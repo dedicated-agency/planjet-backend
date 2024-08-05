@@ -1,0 +1,310 @@
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { GroupService } from 'src/group/group.service';
+import { ProjectService } from 'src/project/project.service';
+import { StatusService } from 'src/status/status.service';
+import { TaskService } from 'src/task/task.service';
+import { UserService } from 'src/user/user.service';
+import { TelegramClient, Api } from 'telegram';
+import { NewMessage } from 'telegram/events';
+import { StringSession } from 'telegram/sessions';
+import * as fs from 'fs';
+import * as path from 'path';
+import { CustomFile } from 'telegram/client/uploads';
+
+interface InitTask {
+    topic: { title: string; id: number };
+    message_id: number;
+    user_id: number;
+    name: string;
+    project_id: number;
+}
+
+@Injectable()
+export class GramBotService implements OnModuleInit {
+    private readonly apiId: number = parseInt(process.env.TELEGRAM_API_ID, 10);
+    private readonly apiHash: string = process.env.TELEGRAM_API_HASH;
+    private readonly botToken: string = process.env.TELEGRAM_BOT_TOKEN;
+    private readonly client: TelegramClient;
+    private readonly logger = new Logger(GramBotService.name);
+
+    constructor(
+        private readonly taskService: TaskService,
+        private readonly userService: UserService,
+        private readonly groupService: GroupService,
+        private readonly statusService: StatusService,
+        private readonly projectService: ProjectService,
+    ) {
+        const stringSession = new StringSession('');
+        this.client = new TelegramClient(stringSession, this.apiId, this.apiHash, {
+          connectionRetries: 5,
+          retryDelay: 600
+        });
+    }
+
+    async onModuleInit() {
+        this.logger.log('Connecting to Telegram...');
+        await this.connectToTelegram();
+    }
+
+    private async connectToTelegram() {
+        let retries = 0;
+        const maxRetries = 3;
+        const baseDelay = 1500; // Start with 1 second
+    
+        while (retries < maxRetries) {
+          try {
+            await this.client.start({
+              botAuthToken: this.botToken,
+            });
+            this.logger.log('Connected to Telegram!');
+    
+            this.client.addEventHandler(this.handleNewMessage.bind(this), new NewMessage({}));
+            // this.client.addEventHandler(this.handleNewReaction.bind(this), new EditedMessage({}));
+            // this.client.addEventHandler(this.checkListener.bind(this), new EventBuilder({}))
+
+            this.logger.log('Bot is up and running!');
+            return; 
+          } catch (error) {
+            this.logger.error(`Failed to connect to Telegram: ${error.message}`);
+            if (error.code === 420 && error.errorMessage === 'FLOOD') {
+              const waitTime = error.seconds * 1000; // Convert to milliseconds
+              this.logger.warn(`FloodWaitError: Waiting for ${waitTime / 1000} seconds`);
+              await this.delay(waitTime);
+              retries++;
+              await this.delay(baseDelay * Math.pow(2, retries));
+            } else {
+              this.logger.error(`Unexpected error: ${error.message}`);
+              break;
+            }
+          }
+        }
+      }
+
+
+    private async checkListener(event)
+    {
+        // if(event)
+        // {
+        //     console.log({
+        //         event: event,
+        //         peer: event.peer,
+        //         message: event.message,
+        //         newReactions: event.newReactions
+        //     });
+        // }
+        // this.getChannelTopics("s")
+    }
+  
+
+
+    private async handleNewMessage(event: any) {
+        const message = event.message;
+
+        if(message)
+        {
+            const chatId = message?.peerId;
+            const messageId = message.id;
+            const messageText: string = message.message;
+            let topic: any;
+
+            console.log(`Received message: ${messageText}`);
+
+            try {
+                if(messageText !== "/start")
+                {
+                    await this.getChannel(message.peerId.channelId)
+                    topic = await this.getChannelTopics(message.peerId.channelId, messageId)
+                }
+            } catch (error) {
+                console.log(`event message error: ${error}`);
+            }
+            if(messageText === "/start")
+            {
+                console.log({
+                    message,
+                    event
+                });
+
+                await this.getFullUser(message.peerId.userId)
+                
+                await this.sendMessage(chatId, `Topshiriqlar boshqaruvchi botiga xush kelibsiz\n
+Assignments welcome to the managing bot\n
+Задания добро пожаловать в управляющий бот`);
+                await this.sendPermissionImage(message.peerId.userId)
+            }else if(messageText === "/manager")
+            {
+                await this.sendMessage(chatId, process.env.TELEGRAM_WEB_APP_URL, messageId);
+            }else if(messageText === "/add")
+            {
+                if(message.replyTo && message.replyTo.replyToMsgId && topic)
+                {
+                    await this.createTask(chatId, message.replyTo.replyToMsgId, message.fromId.userId, topic);
+                    await this.sendMessage(chatId, "Task successfully created", messageId);
+                }else{
+                    await this.sendMessage(chatId, "Task not found", messageId);
+                }
+            }
+        }
+    }
+
+    private async createTask(chatId: any, messageId: number, userId: number, topic: {title: string, id: number})
+    {
+        const message: any = await this.client.getMessages(chatId, {ids: messageId});
+        await this.taskService.init({
+            topic_id: Number(topic.id),
+            topic_title: topic.title,
+            message_id: Number(messageId),
+            name: message[0].message,
+            user_id: Number(userId)
+        })
+    }    
+
+    private async handleNewReaction(event: any) {
+        console.log({
+            originalUpdate: event.originalUpdate?.message,
+            event,
+            message: event.message,
+            replyTo: event.message.replyTo
+        });
+        
+    }
+
+    private delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    private async sendMessage(chatId: any, message: string, replyTo?: number)
+    {
+        try {
+            await this.client.sendMessage(chatId, {
+                message,
+                replyTo: Number(replyTo),
+              });
+        } catch (error) {
+            this.logger.error(`Failed to send message: ${error.message}`);
+        }
+    }
+
+    private async getChannel(id: number){
+        try {
+            const result: any = await this.client.invoke(
+                new Api.channels.GetChannels({
+                    id: [id],
+                })
+            ); 
+              
+            if(result && result.chats.length)
+            {
+                const checkGroup = result.chats[0];
+                const chat_id = checkGroup.id;
+                const accessHash = checkGroup.accessHash;
+                const name: string = checkGroup.title
+                await this.groupService.init({id: chat_id, name});
+                await this.groupUser(id, accessHash);
+            }
+            
+        } catch (error) {
+            console.log("Get full channel error ", error);
+        }
+    }
+
+    private async groupUser(channel_id: number, accessHash: any)
+    {
+        try {
+            const result: any = await this.client.invoke(
+                new Api.channels.GetParticipants({
+                    channel: channel_id,
+                    filter: new Api.ChannelParticipantsRecent(),
+                    offset: 0,
+                    limit: 100,
+                    hash: accessHash,
+                })
+            );
+
+            if(result && result.count > 0)
+            {
+                const users = result.users;
+
+                users.map(async (user: {
+                    id: number,
+                    bot: boolean,
+                    langCode: string,
+                    firstName: string,
+                    username: string | null,
+                    photo: {id: number} | null
+                }) => {
+                    if(!user.bot)
+                    {
+                        const checkUser = await this.userService.init({
+                            id: user.id,
+                            first_name: user.firstName,
+                            language_code: user.langCode,
+                            username: user.username,
+                        });
+
+                        if(checkUser)
+                        {
+                            await this.groupService.checkUsers([user.id], channel_id)
+                        }
+                    }
+                });
+            }
+
+        } catch (error) {
+            console.log("Get groupUser error ", error);
+        }
+    }
+
+    private async getChannelTopics(channelId: number, messageId: number)
+    {
+        try {
+            const result: any = await this.client.invoke(
+                new Api.channels.GetMessages({
+                    channel: channelId,
+                    //  @ts-ignore
+                    id: [messageId],
+                })
+            );
+
+            if(result && result.topics && result.topics.length)
+            {
+                const topics = result.topics;
+                topics.map(async (topic: {
+                    id: number,
+                    title: string,
+                }) => (
+                    await this.projectService.init({groupId: channelId, id: topic.id, name: topic.title})
+                ));
+                return topics.length > 0 ? topics[0] : false
+            }
+        } catch (error) {
+            console.log("Get topics error " + error);
+        }
+    }
+
+    private async getFullUser(userId: number)
+    {
+        const result = await this.client.invoke(
+            new Api.users.GetFullUser({
+              id: Number(userId),
+            })
+        );
+    }
+
+    private async sendPermissionImage(userId: number)
+    {
+        const fullPath = path.join(__dirname, '..', "../public/permissions.png");
+        const file = fs.readFileSync(fullPath);
+        try {
+            const result = await this.client.sendFile(Number(userId), {
+                file: new CustomFile("permissions.png", fs.statSync(fullPath).size, "", file),
+                caption: `Xizmatdan foylananish uchun ushbu ruxsatlarni bering\n
+Give these permissions to file from the service\n
+Предоставьте эти разрешения на использование службы`,
+            });
+        } catch (error) {
+            console.log("Send permissions image error: "+error);
+        }
+    }
+ 
+}
