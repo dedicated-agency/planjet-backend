@@ -20,6 +20,18 @@ export class TaskController {
     return response.json(await this.taskService.init(data));
   }
 
+  @Get("show/:id")
+  @UseGuards(UserGuard)
+  async show(
+    @Req() req,
+    @Res() response: Response,
+    @Param("id") id: number,
+  ){
+    const {user} = req;
+    return response.json(await this.taskService.show(id))
+  }
+
+
   @Get(":id/:status")
   @UseGuards(UserGuard)
   async tasks(
@@ -44,16 +56,5 @@ export class TaskController {
     return response.json(await this.taskService.update(user.id, status, id))
   }
 
-  @Get("show/:id")
-  @UseGuards(UserGuard)
-  async show(
-    @Req() req,
-    @Res() response: Response,
-    @Param("id") id: number,
-    @Param("status") status: number,
-  ){
-    const {user} = req;
-    return response.json(await this.taskService.show(user.id, id))
-  }
 
 }

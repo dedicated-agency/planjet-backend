@@ -160,7 +160,7 @@ export class TaskService {
         }
     }
 
-    async show(user_id: number, id: number)
+    async show(id: number)
     {
         try {
             const task  = await this.prisma.task.findUnique({
