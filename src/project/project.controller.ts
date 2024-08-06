@@ -13,6 +13,8 @@ export class ProjectController {
     @Res() response: Response,
     @Query("status") status: number,
   ){
+    console.log({status});
+    
     return response.json(await this.projectService.showById(project_id, status))
   }
 
