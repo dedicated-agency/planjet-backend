@@ -144,8 +144,7 @@ export class TaskService {
             if(!status) throw new NotFoundException("Status not available");
             await this.prisma.task.update({
                 where: {
-                    id: Number(id),
-                    project_id: Number(task.project_id)
+                    id: Number(id)
                 },
                 data: {
                     status_id: Number(status_id)
