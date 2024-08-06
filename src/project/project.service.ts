@@ -98,12 +98,6 @@ export class ProjectService {
                     }
                 },
                 include: {
-                    tasks: {
-                        include: {
-                            user: true,
-                            status: true
-                        }
-                    },
                     statuses: true
                 }
             });
@@ -112,6 +106,10 @@ export class ProjectService {
                 where: {
                     project_id: Number(project_id),
                     status_id: Number(status)
+                },
+                include: {
+                    user: true,
+                    status: true
                 }
             });
 
