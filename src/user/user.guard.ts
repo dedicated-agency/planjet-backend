@@ -11,8 +11,6 @@ export class UserGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const user_id = this.extractTokenFromHeader(request);
-    console.log({user_id});
-    
     if(!user_id) throw new UnauthorizedException();
     try {
       const user = await this.prisma.user.findUnique({
@@ -20,7 +18,6 @@ export class UserGuard implements CanActivate {
           telegram_id: Number(user_id)
         }
       });
-      console.log({user});
       if(!user) throw new UnauthorizedException();
       request['user'] = user;
     } catch {
@@ -30,8 +27,6 @@ export class UserGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: Request): number | undefined {
-    console.log(request.headers);
-    
     return Number(request.headers['x-user-id']);
   }
 }

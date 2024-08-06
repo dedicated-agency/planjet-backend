@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { Response } from 'express';
 import { UserGuard } from 'src/user/user.guard';
@@ -30,6 +30,18 @@ export class TaskController {
   ){
     const {user} = req;
     return response.json(await this.taskService.tasks(user.id, status, id))
+  }
+
+  @Put(":id/status")
+  @UseGuards(UserGuard)
+  async updateStatus(
+    @Req() req,
+    @Res() response: Response,
+    @Param("id") id: number,
+    @Body("status") status: number,    
+  ){
+    const {user} = req;
+    return response.json(await this.taskService.update(user.id, status, id))
   }
 
 }

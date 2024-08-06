@@ -126,6 +126,40 @@ export class TaskService {
             console.log("Tasks error :" + error);
         }
     }
+
+    async update(user_id: number, status_id: number, id: number)
+    {
+        try {
+            const task = await this.prisma.task.findUnique({
+                where: {
+                    id: Number(id)
+                }
+            });
+            if(!task) throw new NotFoundException("Task not found");
+            const status = await this.prisma.status.findUnique({
+                where: {
+                    id: Number(status_id)
+                }
+            });
+            if(!status) throw new NotFoundException("Status not available");
+            await this.prisma.task.update({
+                where: {
+                    id: Number(id),
+                    project_id: Number(task.project_id)
+                },
+                data: {
+                    status_id: Number(status_id)
+                }
+            });
+
+            return {
+                message: "Status successfully changed"
+            }
+
+        } catch (error) {
+            console.log("Update status task: " + error);
+        }
+    }
 }
 
 
