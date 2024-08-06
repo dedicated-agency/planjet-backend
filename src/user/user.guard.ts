@@ -31,6 +31,8 @@ export class UserGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: Request): number | undefined {
-    return Number(request.headers['User_id']);
+    console.log(request.headers);
+    
+    return Number(request.headers['user_id']);
   }
 }
