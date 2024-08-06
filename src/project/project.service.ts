@@ -90,12 +90,7 @@ export class ProjectService {
         try {
             const project: any = await this.prisma.project.findUnique({
                 where: {
-                    id: Number(project_id),
-                    tasks: {
-                        some: {
-                            status_id: Number(status)
-                        }
-                    }
+                    id: Number(project_id)
                 },
                 include: {
                     statuses: true
@@ -112,8 +107,6 @@ export class ProjectService {
                     status: true
                 }
             });
-
-            project.tasks = tasks;
 
             const users = await this.prisma.user.findMany({
                 where: {
@@ -133,6 +126,9 @@ export class ProjectService {
 
             if(!project)  return [];
             project.users = users;
+            console.log({tasks});
+            
+            project.tasks = tasks ? tasks : [];
 
             return project;
         } catch (error) {
