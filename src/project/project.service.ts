@@ -108,6 +108,15 @@ export class ProjectService {
                 }
             });
 
+            const tasks = await this.prisma.task.findMany({
+                where: {
+                    project_id: Number(project_id),
+                    status_id: Number(status)
+                }
+            });
+
+            project.tasks = tasks;
+
             const users = await this.prisma.user.findMany({
                 where: {
                     groupUsers: {
