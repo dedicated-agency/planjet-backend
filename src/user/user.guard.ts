@@ -1,6 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
-import { Observable } from 'rxjs';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -33,6 +32,6 @@ export class UserGuard implements CanActivate {
   private extractTokenFromHeader(request: Request): number | undefined {
     console.log(request.headers);
     
-    return Number(request.headers['user_id']);
+    return Number(request.headers['x-user-id']);
   }
 }
