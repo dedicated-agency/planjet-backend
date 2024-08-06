@@ -44,4 +44,16 @@ export class TaskController {
     return response.json(await this.taskService.update(user.id, status, id))
   }
 
+  @Get("show/:id")
+  @UseGuards(UserGuard)
+  async show(
+    @Req() req,
+    @Res() response: Response,
+    @Param("id") id: number,
+    @Param("status") status: number,
+  ){
+    const {user} = req;
+    return response.json(await this.taskService.show(user.id, id))
+  }
+
 }

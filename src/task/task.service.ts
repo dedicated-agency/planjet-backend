@@ -159,6 +159,28 @@ export class TaskService {
             console.log("Update status task: " + error);
         }
     }
+
+    async show(user_id: number, id: number)
+    {
+        try {
+            const task  = await this.prisma.task.findUnique({
+                where: {
+                    id: Number(id)
+                },
+                include: {
+                    status: true,
+                    user: true,
+                    project: true
+                }
+            });
+
+            if(!task) throw new NotFoundException("Task not found");
+
+            return task;
+        } catch (error) {
+            console.log("Show task show id " + error);
+        }
+    }
 }
 
 

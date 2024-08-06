@@ -126,8 +126,6 @@ export class ProjectService {
 
             if(!project)  return [];
             project.users = users;
-            console.log({tasks});
-            
             project.tasks = tasks ? tasks : [];
 
             return project;
