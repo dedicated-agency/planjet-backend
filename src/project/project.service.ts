@@ -88,7 +88,7 @@ export class ProjectService {
         }
   
         try {
-            const project = await this.prisma.project.findUnique({
+            const project: any = await this.prisma.project.findUnique({
                 where: {
                     id: Number(project_id),
                     tasks: {
@@ -108,7 +108,24 @@ export class ProjectService {
                 }
             });
 
+            const users = await this.prisma.user.findMany({
+                where: {
+                    groupUsers: {
+                        some: {
+                            group: {
+                                projects: {
+                                    some: {
+                                        id: Number(project_id)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            })
+
             if(!project)  return [];
+            project.users = users;
 
             return project;
         } catch (error) {
