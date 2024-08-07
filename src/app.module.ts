@@ -10,6 +10,7 @@ import { TaskModule } from './task/task.module';
 import { StatusModule } from './status/status.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { PhotoModule } from './photo/photo.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { join } from 'path';
     GroupModule,
     ProjectModule,
     TaskModule,
-    StatusModule
+    StatusModule,
+    PhotoModule
   ],
   controllers: [],
   providers: [PrismaService, UserService],
