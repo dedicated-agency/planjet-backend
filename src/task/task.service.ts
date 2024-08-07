@@ -20,7 +20,7 @@ export class TaskService {
 
         const project = await this.prisma.project.findFirst({
             where: {
-                topic_id: Number(topic_id),
+                topic_id: String(topic_id),
                 name: topic_title
             }
         });
@@ -29,7 +29,7 @@ export class TaskService {
             where: {
                 project_id: Number(project.id),
                 message_id: Number(message_id),
-                user_id: Number(user_id),
+                user_id: String(user_id),
                 name,
             },
             include: {
@@ -77,7 +77,7 @@ export class TaskService {
                     status_id: Number(status.id),
                     project_id: Number(project.id),
                     message_id: Number(message_id),
-                    user_id: Number(user_id),
+                    user_id: String(user_id),
                     name,
                     participants: `${user_id}`
                 }

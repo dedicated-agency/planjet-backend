@@ -17,7 +17,7 @@ export class UserService {
         const {id, first_name, username, language_code} = data;
         const check = await this.prisma.user.findUnique({
             where: {
-                telegram_id: Number(id)
+                telegram_id: String(id)
             },
             include: {
                 tasks: true,
@@ -33,7 +33,7 @@ export class UserService {
         {
             return await this.prisma.user.create({
                 data: {
-                    telegram_id: Number(id),
+                    telegram_id: String(id),
                     name: first_name,
                     username,
                     language_code,

@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE `User` (
-    `telegram_id` INTEGER NOT NULL,
+    `telegram_id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
     `username` VARCHAR(191) NULL,
     `phone` VARCHAR(191) NULL,
@@ -11,7 +11,7 @@ CREATE TABLE `User` (
 
 -- CreateTable
 CREATE TABLE `Group` (
-    `id` INTEGER NOT NULL,
+    `id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`id`)
@@ -19,8 +19,8 @@ CREATE TABLE `Group` (
 
 -- CreateTable
 CREATE TABLE `GroupUser` (
-    `group_id` INTEGER NOT NULL,
-    `user_id` INTEGER NOT NULL,
+    `group_id` VARCHAR(191) NOT NULL,
+    `user_id` VARCHAR(191) NOT NULL,
 
     UNIQUE INDEX `GroupUser_group_id_user_id_key`(`group_id`, `user_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -28,8 +28,8 @@ CREATE TABLE `GroupUser` (
 -- CreateTable
 CREATE TABLE `Project` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `group_id` INTEGER NOT NULL,
-    `topic_id` INTEGER NOT NULL,
+    `group_id` VARCHAR(191) NOT NULL,
+    `topic_id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`id`)
@@ -51,7 +51,7 @@ CREATE TABLE `Task` (
     `status_id` INTEGER NOT NULL,
     `project_id` INTEGER NOT NULL,
     `message_id` INTEGER NULL,
-    `user_id` INTEGER NOT NULL,
+    `user_id` VARCHAR(191) NOT NULL,
     `participants` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
     `description` TEXT NULL,

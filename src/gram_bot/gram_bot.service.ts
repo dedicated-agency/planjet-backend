@@ -199,6 +199,10 @@ Assignments welcome to the managing bot\n
                 const chat_id = checkGroup.id;
                 const accessHash = checkGroup.accessHash;
                 const name: string = checkGroup.title
+
+                console.log({result, checkGroup, id: Number(checkGroup.id)});
+                
+
                 await this.groupService.init({id: chat_id, name});
                 await this.groupUser(id, accessHash);
             }

@@ -15,7 +15,7 @@ export class GroupService {
         const {id, name} = data;
         const check = await this.prisma.group.findUnique({
             where: {
-                id: Number(id)
+                id: String(id)
             }
         });
 
@@ -23,7 +23,7 @@ export class GroupService {
         {
             return await this.prisma.group.create({
                 data: {
-                    id: Number(id),
+                    id: String(id),
                     name: name,
                 }
             });  
@@ -39,16 +39,16 @@ export class GroupService {
             userIds.map(async (userId: number) => {
                 const check = await this.prisma.groupUser.findFirst({
                     where: {
-                        user_id: Number(userId),
-                        group_id: Number(group_id)
+                        user_id: String(userId),
+                        group_id: String(group_id)
                     }
                 });
                 if(!check)
                 {
                     await this.prisma.groupUser.create({
                         data: {
-                            user_id: Number(userId),
-                            group_id: Number(group_id)
+                            user_id: String(userId),
+                            group_id: String(group_id)
                         }
                     });
                 }
@@ -64,7 +64,7 @@ export class GroupService {
                 where: {
                     groupUsers: {
                         some: {
-                            user_id: Number(user_id)
+                            user_id: String(user_id)
                         }
                     }
                 },
@@ -84,7 +84,7 @@ export class GroupService {
         try {
             return await this.prisma.group.findUnique({
                 where: {
-                    id: Number(id)
+                    id: String(id)
                 },
                 include: {
                     projects: {

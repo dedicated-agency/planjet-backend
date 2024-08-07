@@ -15,7 +15,7 @@ export class UserGuard implements CanActivate {
     try {
       const user = await this.prisma.user.findUnique({
         where: {
-          telegram_id: Number(user_id)
+          telegram_id: String(user_id)
         }
       });
       if(!user) throw new UnauthorizedException();

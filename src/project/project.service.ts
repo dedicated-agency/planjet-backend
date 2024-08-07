@@ -16,7 +16,7 @@ export class ProjectService {
         const {groupId, name, id } = props;
         const check = await this.prisma.project.findFirst({
             where: {
-                group_id: Number(groupId),
+                group_id: String(groupId),
                 name,
             },
             include: {
@@ -34,8 +34,8 @@ export class ProjectService {
         {
             return await this.prisma.project.create({
                 data: {
-                    topic_id: Number(id),
-                    group_id: Number(groupId),
+                    topic_id: String(id),
+                    group_id: String(groupId),
                     name,
                 }
             });  
@@ -49,7 +49,7 @@ export class ProjectService {
         try {
             const group = await this.prisma.group.findUnique({
                 where: {
-                    id: Number(group_id)
+                    id: String(group_id)
                 }
             });
 
@@ -57,7 +57,7 @@ export class ProjectService {
 
             return await this.prisma.project.findMany({
                 where: {
-                    group_id: Number(group_id),
+                    group_id: String(group_id),
                 },
                 include: {
                     tasks: {
@@ -98,7 +98,7 @@ export class ProjectService {
         {
             const user = await this.prisma.user.findUnique({
                 where: {
-                    telegram_id: Number(user_id)
+                    telegram_id: String(user_id)
                 }
             });
             if(!user) throw new NotFoundException("User not found");
