@@ -74,8 +74,10 @@ export class ProjectService {
         }
     }
 
-    async showById(project_id: number, status?:number)
+    async showById(props: {project_id: number, status?:number, user_id?: number})
     {
+        const  {project_id} = props;
+        let {status, user_id} = props;
         if(!status)
         {
             const statusId = await this.prisma.status.findFirst({
@@ -85,6 +87,22 @@ export class ProjectService {
                 }
             });
             status = statusId.id
+        }
+
+        const queryCode: any = {
+            project_id: Number(project_id),
+            status_id: Number(status),
+        }
+
+        if(user_id)
+        {
+            const user = await this.prisma.user.findUnique({
+                where: {
+                    telegram_id: Number(user_id)
+                }
+            });
+            if(!user) throw new NotFoundException("User not found");
+            queryCode.user_id = Number(user_id);
         }
   
         try {
@@ -98,10 +116,7 @@ export class ProjectService {
             });
 
             const tasks = await this.prisma.task.findMany({
-                where: {
-                    project_id: Number(project_id),
-                    status_id: Number(status)
-                },
+                where: queryCode,
                 include: {
                     user: true,
                     status: true

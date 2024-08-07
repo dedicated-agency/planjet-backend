@@ -12,10 +12,11 @@ export class ProjectController {
     @Param("project_id") project_id: number,
     @Res() response: Response,
     @Query("status") status: number,
+    @Query("user_id") user_id: number
   ){
     console.log({status});
     
-    return response.json(await this.projectService.showById(project_id, status))
+    return response.json(await this.projectService.showById({project_id, status, user_id}))
   }
 
   @Post('init')
