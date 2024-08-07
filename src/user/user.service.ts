@@ -36,7 +36,7 @@ export class UserService {
                     telegram_id: String(id),
                     name: first_name,
                     username,
-                    language_code,
+                    language_code: language_code ? language_code : "en",
                 }
             });  
         }
