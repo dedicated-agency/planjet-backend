@@ -86,7 +86,12 @@ export class ProjectService {
                     order: 1
                 }
             });
-            status = statusId.id
+            if(statusId)
+            {
+                status = statusId.id
+            }else{
+                status = 0
+            } 
         }
 
         const queryCode: any = {

@@ -197,6 +197,12 @@ export class TaskService {
                         include: {
                             user: true
                         }
+                    },
+                    taskChange: true,
+                    taskComment: {
+                        include: {
+                            user: true
+                        }
                     }
                 }
             });
