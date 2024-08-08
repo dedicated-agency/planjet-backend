@@ -107,7 +107,7 @@ export class ProjectService {
                 }
             });
             if(!user) throw new NotFoundException("User not found");
-            queryCode.user_id = Number(user_id);
+            queryCode.user_id = String(user_id);
         }
   
         try {
