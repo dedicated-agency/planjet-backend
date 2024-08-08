@@ -192,7 +192,12 @@ export class TaskService {
                 include: {
                     status: true,
                     user: true,
-                    project: true
+                    project: true,
+                    taskUser: {
+                        include: {
+                            user: true
+                        }
+                    }
                 }
             });
 
