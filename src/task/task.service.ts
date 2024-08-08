@@ -1,11 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { NotificationService } from 'src/notification/notification.service';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class TaskService {
 
     constructor(
-        private readonly prisma: PrismaService
+        private readonly prisma: PrismaService,
+        private readonly notification: NotificationService
     ){}
 
     async init(props: any)
@@ -62,7 +64,6 @@ export class TaskService {
                     }))
                 });
             }
-
 
             const status = await this.prisma.status.findFirst({
                 where: {
@@ -127,12 +128,16 @@ export class TaskService {
         }
     }
 
-    async update(user_id: number, status_id: number, id: number)
+    async updateStatus(user_id: number, status_id: number, id: number)
     {
         try {
             const task = await this.prisma.task.findUnique({
                 where: {
                     id: Number(id)
+                },
+                include: {
+                    status: true,
+                    project: true,
                 }
             });
             if(!task) throw new NotFoundException("Task not found");
@@ -142,14 +147,31 @@ export class TaskService {
                 }
             });
             if(!status) throw new NotFoundException("Status not available");
+            const data: any = {
+                status_id: Number(status_id)
+            }
+            if(status.name === "Завершено" || status.name === "Tugallangan" || status.name === "Completed"){
+                data.is_completed = true;
+            }else if(task.is_completed){
+                data.is_completed = false;
+            }
             await this.prisma.task.update({
                 where: {
                     id: Number(id)
                 },
+                data
+            });
+
+            const change = await this.prisma.taskChange.create({
                 data: {
-                    status_id: Number(status_id)
+                    user_id: String(user_id),
+                    task_id: Number(id),
+                    type: "status",
+                    old_value: task.status.name
                 }
             });
+
+            if(change) this.notification.send(task.project.group_id, change.id, 'en')
 
             return {
                 message: "Status successfully changed"
@@ -163,7 +185,7 @@ export class TaskService {
     async show(id: number)
     {
         try {
-            const task  = await this.prisma.task.findUnique({
+            const task = await this.prisma.task.findUnique({
                 where: {
                     id: Number(id)
                 },
@@ -181,6 +203,7 @@ export class TaskService {
             console.log("Show task show id " + error);
         }
     }
+
 }
 
 

@@ -7,6 +7,7 @@ import { GroupService } from 'src/group/group.service';
 import { StatusService } from 'src/status/status.service';
 import { ProjectService } from 'src/project/project.service';
 import { UserService } from 'src/user/user.service';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Module({
   controllers: [GramBotController],
@@ -17,7 +18,8 @@ import { UserService } from 'src/user/user.service';
     GroupService,
     StatusService,
     ProjectService,
-    UserService
+    UserService,
+    NotificationService
   ],
 })
 export class GramBotModule {}

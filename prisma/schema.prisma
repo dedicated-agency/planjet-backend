@@ -23,6 +23,9 @@ model User {
 
   groupUsers GroupUser[]
   tasks Task[]
+  taskUser TaskUser[]
+  taskChange TaskChange[]
+  taskComment TaskComment[]
 }
 
 model Group {
@@ -48,6 +51,14 @@ model Project {
   group_id String
   topic_id String
   name String
+  add_permission Boolean @default(false)
+  edit_permission Boolean @default(false)
+  status_permission Boolean @default(false)
+  archive_permission Boolean @default(false)
+  delete_permission Boolean @default(false)
+  comment_permission Boolean @default(false)
+  notification_lang String @default("en")
+
 
   group Group @relation(fields: [group_id], references: [id])
   tasks Task[]
@@ -74,10 +85,50 @@ model Task {
   name String
   description String? @db.Text
   deadline DateTime?
+  is_completed Boolean @default(false)
+  is_archive Boolean @default(false)
+  priority Int @default(2) //1,2,3
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
 
   project Project @relation(fields: [project_id], references: [id])
   status Status  @relation(fields: [status_id], references: [id])
+  user User @relation(fields: [user_id], references: [telegram_id])
+  taskUser TaskUser[]
+  taskChange TaskChange[]
+  taskComment TaskComment[]
+}
+
+model TaskUser {
+  task_id Int
+  user_id String
+
+  @@unique([task_id, user_id])
+
+  task Task @relation(fields: [task_id], references: [id])
+  user User @relation(fields: [user_id], references: [telegram_id])
+}
+
+model TaskChange {
+  id Int @id @default(autoincrement())
+  task_id Int
+  user_id String
+  type String @default("status") // (status, priority, name, deadline)
+  old_value String
+  created_at DateTime @default(now())
+
+  task Task @relation(fields: [task_id], references: [id])
+  user User @relation(fields: [user_id], references: [telegram_id])
+}
+
+model TaskComment {
+  task_id Int
+  user_id String
+  comment String @db.Text
+  created_at DateTime @default(now())
+
+  @@unique([task_id, user_id])
+
+  task Task @relation(fields: [task_id], references: [id])
   user User @relation(fields: [user_id], references: [telegram_id])
 }

@@ -11,6 +11,7 @@ import { StatusModule } from './status/status.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { PhotoModule } from './photo/photo.module';
+import { NotificationService } from './notification/notification.service';
 
 @Module({
   imports: [
@@ -30,6 +31,6 @@ import { PhotoModule } from './photo/photo.module';
     PhotoModule
   ],
   controllers: [],
-  providers: [PrismaService, UserService],
+  providers: [PrismaService, UserService, NotificationService],
 })
 export class AppModule {}

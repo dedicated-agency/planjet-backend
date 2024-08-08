@@ -53,7 +53,7 @@ export class TaskController {
     @Body("status") status: number,    
   ){
     const {user} = req;
-    return response.json(await this.taskService.update(user.id, status, id))
+    return response.json(await this.taskService.updateStatus(user.id, status, id))
   }
 
 
