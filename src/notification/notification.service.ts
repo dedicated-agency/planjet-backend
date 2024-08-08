@@ -20,7 +20,8 @@ export class NotificationService {
                     task: {
                         include: {
                             project: true,
-                            user: true
+                            user: true,
+                            status: true,
                         }
                     },
                     user: true,
@@ -30,30 +31,43 @@ export class NotificationService {
                 console.log('change not found in messageShaper')
                 return 
             }
-            const result = await axios.post(url, {
+
+            console.log({
+                change,
                 chat_id: chat_id,
-                text: await this.messageShaper(lang, change),
+                text: this.messageShaper(lang, change),
                 message_thread_id: change.task.project.topic_id,
                 parse_mode: 'HTML',
+            })
+
+            const result = await axios.post(url, {
+                chat_id: "-100" + chat_id,
+                text: this.messageShaper(lang, change),
+                parse_mode: 'html',
+                message_thread_id: change.task.project.topic_id,
             });
-            console.log({result});
             return "success"
         } catch (error) {
-            console.log('send error' + error);
+            console.log('send error' +  error.response ? error.response.data : error.message);
         }
     }
 
-    async messageShaper(lang: string = 'en', change: any)
+    messageShaper(lang: string = 'en', change: any)
     {
         // (status, priority, name, deadline)
         try {
-           
+            let changer = '';
+            if(change.type === 'status')
+            {
+                changer = change.task.status.name
+            }
+
             return `#${languages[lang].change} by ${change.user.name}
-<a href="https://t.me/dedicated_task_manager_bot/tasks/${change.task_id}">olma</a>
+<a href='https://t.me/dedicated_task_manager_bot/Task_Manager?startapp=tasks_${change.task_id}'>${change.task.name}</a>
 ${languages[lang].project}: <b>${change.task.project.name} 💻</b>
-${languages[lang].author}: <b>${change.task.user.name}</b> 
+${languages[lang].author}: <b>${change.task.user.username ? "<a href='https://t.me/" + change.task.user.username + "'>" + change.task.user.name + "</a>" : change.task.user.name }</b>
    
-${languages[lang][change.type]}: <b>${change.old_value} ➡️ ${change.task[change.type]}</b> 
+${languages[lang][change.type]}: <b>${change.old_value} ➡️ ${changer}</b> 
 `
         } catch (error) {
             console.log("Error messageShaper: " + error);

@@ -204,6 +204,49 @@ export class TaskService {
         }
     }
 
+    async participants(usernames: string[], task_id: number)
+    {
+        if(usernames.length > 0)
+        {
+            usernames.map(async (username) => {
+                try {
+                    const user = await this.prisma.user.findFirst({
+                        where: {
+                            username
+                        }
+                    });
+                    if(!user) return
+                    const task = await this.prisma.task.findUnique({
+                        where: {
+                            id: Number(task_id)
+                        }
+                    });
+                    if(!task) return
+
+                    const check = await this.prisma.taskUser.findFirst({
+                        where: {
+                            user_id: user.telegram_id,
+                            task_id: Number(task_id)
+                        }
+                    });
+
+                    if(!check)
+                    {
+                        await this.prisma.taskUser.create({
+                            data: {
+                                user_id: user.telegram_id,
+                                task_id: Number(task_id)
+                            }
+                        });
+                    }
+
+                } catch (error) {
+                    console.log("taskUser error" + error);
+                }
+            });
+        }
+    }
+
 }
 
 

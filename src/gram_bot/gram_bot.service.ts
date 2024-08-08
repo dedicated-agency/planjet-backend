@@ -120,11 +120,6 @@ export class GramBotService implements OnModuleInit {
             }
             if(messageText === "/start")
             {
-                console.log({
-                    message,
-                    event
-                });
-
                 await this.getFullUser(message.peerId.userId)
                 
                 await this.sendMessage(chatId, `Topshiriqlar boshqaruvchi botiga xush kelibsiz\n
@@ -150,13 +145,24 @@ Assignments welcome to the managing bot\n
     private async createTask(chatId: any, messageId: number, userId: number, topic: {title: string, id: number})
     {
         const message: any = await this.client.getMessages(chatId, {ids: messageId});
-        await this.taskService.init({
+
+        const usernameRegex = /@\w+/g;
+        const usernames =  message[0].message.match(usernameRegex);
+        const messageText =  message[0].message.replace(usernameRegex, '').trim();
+
+        const task = await this.taskService.init({
             topic_id: Number(topic.id),
             topic_title: topic.title,
             message_id: Number(messageId),
-            name: message[0].message,
+            name: messageText,
             user_id: Number(userId)
-        })
+        });
+
+        if(task && usernames.length)
+        {
+            await this.taskService.participants(usernames, task.id);
+        }
+
     }    
 
     private async handleNewReaction(event: any) {
