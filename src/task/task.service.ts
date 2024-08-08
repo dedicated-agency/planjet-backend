@@ -212,7 +212,7 @@ export class TaskService {
                 try {
                     const user = await this.prisma.user.findFirst({
                         where: {
-                            username
+                            username: username.replace(/^@/, '')
                         }
                     });
                     if(!user) return
