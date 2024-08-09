@@ -115,6 +115,7 @@ model TaskChange {
   user_id String
   type String @default("status") // (status, priority, name, deadline)
   old_value String
+  new_value String
   created_at DateTime @default(now())
 
   task Task @relation(fields: [task_id], references: [id])

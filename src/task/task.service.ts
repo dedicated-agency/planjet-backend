@@ -167,7 +167,8 @@ export class TaskService {
                     user_id: String(user_id),
                     task_id: Number(id),
                     type: "status",
-                    old_value: task.status.name
+                    old_value: task.status.name,
+                    new_value: status.name
                 }
             });
 

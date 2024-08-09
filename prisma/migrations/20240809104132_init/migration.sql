@@ -87,6 +87,7 @@ CREATE TABLE `TaskChange` (
     `user_id` VARCHAR(191) NOT NULL,
     `type` VARCHAR(191) NOT NULL DEFAULT 'status',
     `old_value` VARCHAR(191) NOT NULL,
+    `new_value` VARCHAR(191) NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`id`)
