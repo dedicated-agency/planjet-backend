@@ -10,6 +10,8 @@ import { StringSession } from 'telegram/sessions';
 import * as fs from 'fs';
 import * as path from 'path';
 import { CustomFile } from 'telegram/client/uploads';
+import { NotificationService } from 'src/notification/notification.service';
+import { PrismaService } from 'src/prisma.service';
 
 interface InitTask {
     topic: { title: string; id: number };
@@ -33,6 +35,8 @@ export class GramBotService implements OnModuleInit {
         private readonly groupService: GroupService,
         private readonly statusService: StatusService,
         private readonly projectService: ProjectService,
+        private readonly notificationService: NotificationService,
+        private readonly prisma: PrismaService,
     ) {
         const stringSession = new StringSession('');
         this.client = new TelegramClient(stringSession, this.apiId, this.apiHash, {
@@ -134,7 +138,6 @@ Assignments welcome to the managing bot\n
                 if(message.replyTo && message.replyTo.replyToMsgId && topic)
                 {
                     await this.createTask(chatId, message.replyTo.replyToMsgId, message.fromId.userId, topic);
-                    await this.sendMessage(chatId, "Task successfully created", messageId);
                 }else{
                     await this.sendMessage(chatId, "Task not found", messageId);
                 }
@@ -144,25 +147,50 @@ Assignments welcome to the managing bot\n
 
     private async createTask(chatId: any, messageId: number, userId: number, topic: {title: string, id: number})
     {
-        const message: any = await this.client.getMessages(chatId, {ids: messageId});
+        try {
+            const message: any = await this.client.getMessages(chatId, {ids: messageId});
 
-        const usernameRegex = /@\w+/g;
-        const usernames =  message[0].message.match(usernameRegex);
-        const messageText =  message[0].message.replace(usernameRegex, '').trim();
+            const usernameRegex = /@\w+/g;
+            const usernames =  message[0].message.match(usernameRegex);
+            const messageText =  message[0].message.replace(usernameRegex, '').trim();
+    
+            const task = await this.taskService.init({
+                topic_id: Number(topic.id),
+                topic_title: topic.title,
+                message_id: Number(messageId),
+                name: messageText,
+                user_id: Number(userId)
+            });
+    
+            if(task && usernames && usernames.length)
+            {
+                await this.taskService.participants(usernames, task.id);
+            }
 
-        const task = await this.taskService.init({
-            topic_id: Number(topic.id),
-            topic_title: topic.title,
-            message_id: Number(messageId),
-            name: messageText,
-            user_id: Number(userId)
-        });
-
-        if(task && usernames.length)
-        {
-            await this.taskService.participants(usernames, task.id);
+            const gotTask = await this.prisma.task.findUnique({
+                where: {
+                    id: task.id
+                },
+                include: {
+                    project: {
+                        include: {
+                            group: true
+                        }
+                    },
+                    status: true,
+                    user: true,
+                }
+            })
+ 
+            if(gotTask)
+            {
+                await this.notificationService.send(gotTask.project.group_id, 13, gotTask.user.language_code, "createTask", gotTask);
+            }
+     
+            // await this.sendMessage(chatId, "Task successfully created", messageId);
+        } catch (error) {
+            console.log("Create task error" + error);
         }
-
     }    
 
     private async handleNewReaction(event: any) {

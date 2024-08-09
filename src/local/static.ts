@@ -22,7 +22,8 @@ export const languages = {
         "start_date": "Boshlanish sanasi",
         "file": "Fayl",
         "change": "o'zgartirish",
-        "priority": "ustuvorlik"
+        "priority": "ustuvorlik",
+        'task_created': "Yangi task yaratildi"
     },
     "en": {
         "my_tasks": "My tasks",
@@ -47,7 +48,8 @@ export const languages = {
         "start_date": "Start date",
         "file": "File",
         "change": "change",
-        "priority": "priority"
+        "priority": "priority",
+        'task_created': "New task created"
     },
     "ru": {
         "my_tasks": "Мои задачи",
@@ -72,6 +74,7 @@ export const languages = {
         "start_date": "Дата начала",
         "file": "Файлы",
         "change": "менять",
-        "priority": "приоритет"
+        "priority": "приоритет",
+        'task_created': "Создана новая задача"
     }
 }
