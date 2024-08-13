@@ -81,11 +81,9 @@ export class TaskController {
     @Req() req,
     @Res() response: Response,
     @Param("id") id: number,
-    @Body("priority") status: number,    
+    @Body("priority") priority: number,    
   ){
     const {user} = req;
-    return response.json(await this.taskService.updateStatus(user.telegram_id, status, id))
+    return response.json(await this.taskService.updatePriority(user.telegram_id, priority, id))
   }
-
-
 }
