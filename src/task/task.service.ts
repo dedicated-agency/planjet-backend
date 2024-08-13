@@ -81,8 +81,6 @@ export class TaskService {
                 }
             });
 
-     
-
             const newTask = await this.prisma.task.create({
                 data: {
                     status_id: Number(status.id),
@@ -116,6 +114,13 @@ export class TaskService {
             });
 
             await this.notification.send(newTask.project.group_id, 13, newTask.user.language_code, "createTask", newTask);
+
+            await this.prisma.taskUser.createMany({
+                data: participant.map((part: any) => ({
+                    user_id: String(part),
+                    task_id: newTask.id
+                }))
+            });
 
             return newTask;
         }
