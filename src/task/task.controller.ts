@@ -7,6 +7,24 @@ import { UserGuard } from 'src/user/user.guard';
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
+  @Post('create')
+  @UseGuards(UserGuard)
+  async create(
+    @Body() data:  {
+      project_id: number,
+      name: string,
+      description: string,
+      deadline: string,
+      participant: number[],
+      priority: number
+    },
+    @Res() response: Response,
+    @Req() req,
+  ){
+    const {user} = req;
+    return response.json(await this.taskService.create(data, user.telegram_id));
+  }
+
   @Post('init')
   async init(
     @Body() data:  {
@@ -51,6 +69,19 @@ export class TaskController {
     @Res() response: Response,
     @Param("id") id: number,
     @Body("status") status: number,    
+  ){
+    const {user} = req;
+    return response.json(await this.taskService.updateStatus(user.telegram_id, status, id))
+  }
+
+
+  @Put(":id/status")
+  @UseGuards(UserGuard)
+  async updatePriority(
+    @Req() req,
+    @Res() response: Response,
+    @Param("id") id: number,
+    @Body("priority") status: number,    
   ){
     const {user} = req;
     return response.json(await this.taskService.updateStatus(user.telegram_id, status, id))

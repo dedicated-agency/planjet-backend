@@ -81,10 +81,10 @@ export class NotificationService {
         try {
             return `#${languages[lang].change} by ${change.user.name}
 
-            
 <a href='https://t.me/dedicated_task_manager_bot/Task_Manager?startapp=tasks_${change.task_id}'>${change.task.name}</a>
 
 ${languages[lang].project}: <b>${change.task.project.name} 💻</b>
+
 ${languages[lang].author}: <b>${change.task.user.username ? "<a href='https://t.me/" + change.task.user.username + "'>" + change.task.user.name + "</a>" : change.task.user.name }</b>
    
 ${languages[lang][change.type]}: <b>${change.old_value} ➡️ ${change.new_value}</b> 
@@ -97,11 +97,11 @@ ${languages[lang][change.type]}: <b>${change.old_value} ➡️ ${change.new_valu
     createTask(lang: string = 'en', task: any)
     {
         try {
-            return `#taskCreate by ${task.user.name}
+            return `#task by ${task.user.name}
+
 <a href='https://t.me/dedicated_task_manager_bot/Task_Manager?startapp=tasks_${task.id}'>${task.name}</a>
 
 ${languages[lang].project}: <b>${task.project.name} 💻</b>
-
 
 ${languages[lang].author}: <b>${task.user.username ? "<a href='https://t.me/" + task.user.username + "'>" + task.user.name + "</a>" : task.user.name }</b>
    

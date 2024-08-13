@@ -185,9 +185,17 @@ Assignments welcome to the managing bot\n
             if(gotTask)
             {
                 await this.notificationService.send(gotTask.project.group_id, 13, gotTask.user.language_code, "createTask", gotTask);
+                await this.prisma.taskChange.create({
+                    data: {
+                        user_id: String(userId),
+                        task_id: Number(gotTask.id),
+                        type: "created",
+                        old_value: "created",
+                        new_value: "created"
+                    }
+                });
             }
      
-            // await this.sendMessage(chatId, "Task successfully created", messageId);
         } catch (error) {
             console.log("Create task error" + error);
         }
