@@ -75,7 +75,7 @@ export class TaskController {
   }
 
 
-  @Put(":id/status")
+  @Put(":id/priority")
   @UseGuards(UserGuard)
   async updatePriority(
     @Req() req,
