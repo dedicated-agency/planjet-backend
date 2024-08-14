@@ -97,6 +97,7 @@ export class ProjectService {
         const queryCode: any = {
             project_id: Number(project_id),
             status_id: Number(status),
+            is_archive: false
         }
 
         if(user_id)
