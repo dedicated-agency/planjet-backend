@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { NotificationService } from 'src/notification/notification.service';
 import { PrismaService } from 'src/prisma.service';
 
@@ -518,6 +518,38 @@ export class TaskService {
             return "Successfully changed";
         } catch (error) {
             console.log("Archive error: " + error);
+        }
+    }
+
+    async comment(user_id: number, id: number, text: string)
+    {
+        try {
+            const task = await this.prisma.task.findUnique({
+                where: {
+                    id: Number(id)
+                }
+            });
+            if(!task) throw new NotFoundException("Task not found");
+
+            if(text === "") throw new BadRequestException("Not found text");
+
+            const comment = this.prisma.taskComment.create({
+                data: {
+                    comment: text,
+                    task_id: Number(id),
+                    user_id: String(user_id)
+                }
+            });
+
+            if(comment)
+            {
+                return comment
+            }
+
+            throw new NotFoundException("Task not found"); 
+        } catch (error) {
+            console.log("create commment error: " + error);
+            throw new NotFoundException("Task not found"); 
         }
     }
 }

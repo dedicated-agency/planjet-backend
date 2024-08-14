@@ -114,4 +114,16 @@ export class TaskController {
     
     return response.json(await this.taskService.archive(user.telegram_id, id, archive))
   }
+
+  @Put(":id/comment")
+  @UseGuards(UserGuard)
+  async comment(
+    @Req() req,
+    @Res() response: Response,
+    @Param("id") id: number,
+    @Body("text") text: string, 
+  ){
+    const {user} = req;
+    return response.json(await this.taskService.comment(user.telegram_id, id, text))
+  }
 }
