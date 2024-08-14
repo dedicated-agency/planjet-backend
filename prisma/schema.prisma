@@ -123,12 +123,11 @@ model TaskChange {
 }
 
 model TaskComment {
+  id Int @id @default(autoincrement())
   task_id Int
   user_id String
   comment String @db.Text
   created_at DateTime @default(now())
-
-  @@unique([task_id, user_id])
 
   task Task @relation(fields: [task_id], references: [id])
   user User @relation(fields: [user_id], references: [telegram_id])
