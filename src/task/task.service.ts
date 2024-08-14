@@ -206,7 +206,6 @@ export class TaskService {
         return check
     }
 
-
     private statusList = [
         {
             id: 1,
@@ -225,7 +224,6 @@ export class TaskService {
             name: "Completed",
         }
     ];
-
 
     async tasks(user_id: number, status_id: number, id: number)
     {
@@ -428,6 +426,100 @@ export class TaskService {
         }
     }
 
+    async delete(user_id: number, id: number)
+    {
+        try {
+            const task = await this.prisma.task.findUnique({
+                where: {
+                    id: Number(id)
+                }
+            });
+    
+            if(!task) throw new NotFoundException("Task not found");
+    
+            try {
+                const taskComments = await this.prisma.taskComment.deleteMany({
+                    where: {
+                        task_id: Number(task.id)
+                    }
+                });
+            } catch (error) {
+                console.log("Delete taskComments error: " + error);
+            }
+
+            try {
+                const taskChanges = await this.prisma.taskChange.deleteMany({
+                    where: {
+                        task_id: Number(task.id)
+                    }
+                });
+            } catch (error) {
+                console.log("Delete taskComments error: " + error);
+            }
+
+            try {
+                const taskUsers = await this.prisma.taskUser.deleteMany({
+                    where: {
+                        task_id: Number(task.id)
+                    }
+                });
+            } catch (error) {
+                console.log("Delete taskComments error: " + error);
+            }
+       
+            const check = await this.prisma.task.delete({
+                where: {
+                    id: Number(task.id)
+                }
+            });
+
+            if(check)
+            {
+                return "Deleted successfully"
+            }else{
+                return "Not deleted"
+            }
+       
+        } catch (error) {
+            console.log("Delete task error: " + error);
+            return "Not deleted"
+        }
+    }
+
+    async archive(user_id: number, id: number, archive: boolean)
+    {
+        try {
+            const task = await this.prisma.task.findUnique({
+                where: {
+                    id: Number(id)
+                }
+            });
+            if(!task) throw new NotFoundException("Task not found");
+            if(archive)
+            {
+                await this.prisma.task.update({
+                    where: {
+                        id: Number(id)
+                    },
+                    data: {
+                        is_archive: true
+                    }
+                });
+            }else{
+                await this.prisma.task.update({
+                    where: {
+                        id: Number(id)
+                    },
+                    data: {
+                        is_archive: false
+                    }
+                });
+            }
+            return "Successfully changed";
+        } catch (error) {
+            console.log("Archive error: " + error);
+        }
+    }
 }
 
 

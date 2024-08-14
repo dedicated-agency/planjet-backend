@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { Response } from 'express';
 import { UserGuard } from 'src/user/user.guard';
@@ -85,5 +85,29 @@ export class TaskController {
   ){
     const {user} = req;
     return response.json(await this.taskService.updatePriority(user.telegram_id, priority, id))
+  }
+
+
+  @Delete(":id")
+  @UseGuards(UserGuard)
+  async deleteUser(
+    @Req() req,
+    @Res() response: Response,
+    @Param("id") id: number,
+  ){
+    const {user} = req;
+    return response.json(await this.taskService.delete(user.telegram_id, id))
+  }
+
+  @Put(":id/archive")
+  @UseGuards(UserGuard)
+  async archive(
+    @Req() req,
+    @Res() response: Response,
+    @Param("id") id: number,
+    @Body("archive") archive: boolean, 
+  ){
+    const {user} = req;
+    return response.json(await this.taskService.archive(user.telegram_id, id, archive))
   }
 }
