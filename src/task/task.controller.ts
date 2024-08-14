@@ -105,7 +105,7 @@ export class TaskController {
     @Req() req,
     @Res() response: Response,
     @Param("id") id: number,
-    @Body("archive") archive: boolean, 
+    @Body("archive") archive: any, 
   ){
     const {user} = req;
     console.log({
