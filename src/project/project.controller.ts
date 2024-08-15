@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { Response } from 'express';
 
@@ -38,5 +38,14 @@ export class ProjectController {
     @Res() response: Response
   ){
     return response.json(await this.projectService.main(group_id))
+  }
+
+  @Delete(":id")
+  @UseGuards(UseGuards)
+  async deleteFunc(
+    @Param("id") id: number,
+    @Res() response: Response,
+  ){
+    return response.json(await this.projectService.deleteFunc(id))
   }
 }

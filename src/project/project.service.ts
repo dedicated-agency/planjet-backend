@@ -158,4 +158,72 @@ export class ProjectService {
             console.log("Project show by id: " + error);
         }
     }
+
+    async deleteFunc(id: number)
+    {
+            const check = await this.prisma.project.findUnique({
+                where: {
+                    id: Number(id)
+                },
+                include: {
+                    tasks: {
+                        include: {
+                            taskChange: true,
+                            taskComment: true,
+                            taskUser: true
+                        }
+                    },
+                    statuses: true
+                }
+            });
+            if(!check) throw new NotFoundException("Project not found");
+
+
+            if (check.tasks.length > 0) {
+                for (const task of check.tasks) {
+                    try {
+                        await this.prisma.taskComment.deleteMany({
+                            where: { task_id: Number(task.id) }
+                        });
+            
+                        await this.prisma.taskChange.deleteMany({
+                            where: { task_id: Number(task.id) }
+                        });
+            
+                        await this.prisma.taskUser.deleteMany({
+                            where: { task_id: Number(task.id) }
+                        });
+            
+                        await this.prisma.task.delete({
+                            where: { id: Number(task.id) }
+                        });
+                    } catch (error) {
+                        console.log("Project task delete error: " + error);
+                    }
+                }
+            }
+            
+            if (check.statuses.length > 0) {
+                try {
+                    // Assuming statuses have relationships that need to be deleted first
+                    await this.prisma.status.deleteMany({
+                        where: {
+                            id: {
+                                in: check.statuses.map((status) => Number(status.id)),
+                            },
+                        },
+                    });
+                } catch (error) {
+                    console.log("Project status delete error: " + error);
+                }
+            }
+
+            await this.prisma.project.delete({
+                where: {
+                    id: Number(check.id)
+                }
+            })
+
+            return "SUccessfullt deleted"
+    }
 }
