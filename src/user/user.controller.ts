@@ -1,6 +1,7 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Response } from 'express';
+import { UserGuard } from './user.guard';
 
 @Controller('user')
 export class UserController {
@@ -19,5 +20,15 @@ export class UserController {
     @Res() response: Response
   ){
     return response.json(await this.userService.init(data));
+  }
+
+  @Get("tasks")
+  @UseGuards(UserGuard)
+  async tasks(
+    @Req() req,
+    @Res() response: Response
+  ){
+    const {user} = req;
+    return  response.json(await this.userService.init(user.telegram_id));
   }
 }

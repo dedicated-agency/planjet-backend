@@ -14,8 +14,6 @@ export class ProjectController {
     @Query("status") status: number,
     @Query("user_id") user_id: number
   ){
-    console.log({status});
-    
     return response.json(await this.projectService.showById({project_id, status, user_id}))
   }
 

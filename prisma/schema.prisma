@@ -48,7 +48,7 @@ model GroupUser{
 
 model Project {
   id Int @default(autoincrement()) @id
-  group_id String
+  group_id String?
   topic_id String
   name String
   add_permission Boolean @default(false)
@@ -60,7 +60,7 @@ model Project {
   notification_lang String @default("en")
 
 
-  group Group @relation(fields: [group_id], references: [id])
+  group Group? @relation(fields: [group_id], references: [id])
   tasks Task[]
   statuses Status[]
 }

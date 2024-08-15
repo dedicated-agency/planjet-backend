@@ -18,19 +18,27 @@ export class NotificationService {
             
             if(task && type === "createTask")
             {
-                console.log({
+                // console.log({
+                //     chat_id: "-100" + chat_id,
+                //     text: this.createTask(lang, task),
+                //     parse_mode: 'html',
+                //     message_thread_id: task.project.topic_id,
+                // });
+
+
+                const data: any = {
                     chat_id: "-100" + chat_id,
                     text: this.createTask(lang, task),
                     parse_mode: 'html',
-                    message_thread_id: task.project.topic_id,
-                });
+                }
+
+                if(task.project.topic_id !== '1')
+                {
+                    data.message_thread_id = task.project.topic_id
+                }
+    
                 
-                const result = await axios.post(url, {
-                    chat_id: "-100" + chat_id,
-                    text: this.createTask(lang, task),
-                    parse_mode: 'html',
-                    message_thread_id: task.project.topic_id,
-                });
+                const result = await axios.post(url, data);
                 return "success"
             }else{
                 const change = await this.prisma.taskChange.findUnique({
@@ -60,13 +68,19 @@ export class NotificationService {
                 //     message_thread_id: change.task.project.topic_id,
                 //     parse_mode: 'HTML',
                 // })
-    
-                const result = await axios.post(url, {
+
+                const data: any = {
                     chat_id: "-100" + chat_id,
                     text: this.messageShaper(lang, change),
                     parse_mode: 'html',
-                    message_thread_id: change.task.project.topic_id,
-                });
+                }
+
+                if(change.task.project.topic_id !== '1')
+                {
+                    data.message_thread_id = change.task.project.topic_id
+                }
+    
+                const result = await axios.post(url, data);
                 return "success"
             }
            

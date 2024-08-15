@@ -51,6 +51,33 @@ export class GroupService {
                             group_id: String(group_id)
                         }
                     });
+
+                    const mytaskproject = await this.prisma.project.create({
+                        data: {
+                            name: "mytasks",
+                            topic_id: String(userId),
+                        }
+                    });
+
+                    if(mytaskproject)
+                    {
+                        let statuses: any = await this.prisma.status.findMany({
+                            where: {
+                                project_id: Number(mytaskproject.id)
+                            }
+                        });
+            
+                        if(statuses.length === 0)
+                        {
+                            statuses = await this.prisma.status.createMany({
+                                data: this.statusList.map((element) => ({
+                                    name: element.name,
+                                    order: element.id,
+                                    project_id: Number(mytaskproject.id) 
+                                }))
+                            });
+                        }
+                    }
                 }
             });
         }
@@ -99,4 +126,23 @@ export class GroupService {
             console.log("Group show by id" + error);
         }
     }
+
+    private statusList = [
+        {
+            id: 1,
+            name: "To do",
+        },
+        {
+            id: 2,
+            name: "In Progress",
+        },
+        {
+            id: 3,
+            name: "Testing",
+        },
+        {
+            id: 4,
+            name: "Completed",
+        }
+    ];
 }

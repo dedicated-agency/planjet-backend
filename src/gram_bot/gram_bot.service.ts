@@ -135,7 +135,7 @@ Assignments welcome to the managing bot\n
                 await this.sendMessage(chatId, process.env.TELEGRAM_WEB_APP_URL, messageId);
             }else if(messageText === "/add")
             {
-                if(message.replyTo && message.replyTo.replyToMsgId && topic)
+                if(message.replyTo && topic)
                 {
                     await this.createTask(chatId, message.replyTo.replyToMsgId, message.fromId.userId, topic);
                 }else{
@@ -145,7 +145,7 @@ Assignments welcome to the managing bot\n
         }
     }
 
-    private async createTask(chatId: any, messageId: number, userId: number, topic: {title: string, id: number})
+    private async createTask(chatId: any, messageId: number, userId: number, topic: {title?: string, id: number, name?: string, topic_id?: number})
     {
         try {
             const message: any = await this.client.getMessages(chatId, {ids: messageId});
@@ -155,8 +155,8 @@ Assignments welcome to the managing bot\n
             const messageText =  message[0].message.replace(usernameRegex, '').trim();
     
             const task = await this.taskService.init({
-                topic_id: Number(topic.id),
-                topic_title: topic.title,
+                topic_id: topic.topic_id ? topic.topic_id : Number(topic.id),
+                topic_title: topic.title ? topic.title : topic.name,
                 message_id: Number(messageId),
                 name: messageText,
                 user_id: Number(userId)
@@ -197,7 +197,7 @@ Assignments welcome to the managing bot\n
             }
      
         } catch (error) {
-            console.log("Create task error" + error);
+            console.log("Create task error " + error);
         }
     }    
 
@@ -241,9 +241,6 @@ Assignments welcome to the managing bot\n
                 const chat_id = checkGroup.id;
                 const accessHash = checkGroup.accessHash;
                 const name: string = checkGroup.title
-
-                console.log({result, checkGroup, id: Number(checkGroup.id)});
-                
 
                 await this.groupService.init({id: chat_id, name});
                 await this.groupUser(id, accessHash);
@@ -322,6 +319,8 @@ Assignments welcome to the managing bot\n
                     await this.projectService.init({groupId: channelId, id: topic.id, name: topic.title})
                 ));
                 return topics.length > 0 ? topics[0] : false
+            }else{
+                return await this.projectService.init({groupId: channelId, id: 1, name: "General"})
             }
         } catch (error) {
             console.log("Get topics error " + error);

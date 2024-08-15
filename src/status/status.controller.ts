@@ -8,6 +8,7 @@ export class StatusController {
   constructor(private readonly statusService: StatusService) {}
   
   @Post()
+  @UseGuards(UserGuard)
   async init(
     @Body() data: {
       project_id: number,
