@@ -161,9 +161,10 @@ Assignments welcome to the managing bot\n
                 topic_title: topic.title ? topic.title : topic.name,
                 message_id: Number(messageId),
                 name: messageText,
-                user_id: Number(userId)
+                user_id: Number(userId),
+                group_id: Number(chatId.channelId)
             });
-    
+
             if(task && usernames && usernames.length)
             {
                 await this.taskService.participants(usernames, task.id);

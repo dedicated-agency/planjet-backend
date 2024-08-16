@@ -135,13 +135,15 @@ export class TaskService {
             topic_title, 
             message_id, 
             user_id, 
-            name 
+            name,
+            group_id
         } = props;
 
-        const project = await this.prisma.project.findFirst({
+        let project = await this.prisma.project.findFirst({
             where: {
                 topic_id: String(topic_id),
-                name: topic_title
+                name: topic_title,
+                group_id: group_id
             }
         });
 
