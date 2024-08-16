@@ -31,6 +31,9 @@ export class NotificationService {
 
             const project = change.task.project;
 
+            console.log(project);
+            
+
             if(task && type === "createTask" && project.add_permission)
             {
 

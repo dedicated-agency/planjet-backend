@@ -187,8 +187,7 @@ Assignments welcome to the managing bot\n
  
             if(gotTask)
             {
-                await this.notificationService.send(gotTask.project.group_id, 13, gotTask.user.language_code, "createTask", gotTask);
-                await this.prisma.taskChange.create({
+                const checkChange = await this.prisma.taskChange.create({
                     data: {
                         user_id: String(userId),
                         task_id: Number(gotTask.id),
@@ -197,6 +196,10 @@ Assignments welcome to the managing bot\n
                         new_value: "created"
                     }
                 });
+                if(checkChange)
+                {
+                    await this.notificationService.send(gotTask.project.group_id, 13, gotTask.user.language_code, "createTask", gotTask);
+                }
             }
      
         } catch (error) {
