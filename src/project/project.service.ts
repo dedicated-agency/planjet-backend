@@ -224,7 +224,7 @@ export class ProjectService {
                 }
             })
 
-            return "SUccessfullt deleted"
+        return "Successfully deleted"
     }
 
     async notification(id: number, type: string, value: boolean)

@@ -17,12 +17,9 @@ export class NotificationService {
                     id: task.project_id
                 }
             });
-
-            
             
             if(task && type === "createTask" && project.add_permission)
             {
-
                 const data: any = {
                     chat_id: "-100" + chat_id,
                     text: this.createTask(lang, task),
@@ -34,7 +31,6 @@ export class NotificationService {
                     data.message_thread_id = task.project.topic_id
                 }
     
-                
                 const result = await axios.post(url, data);
                 console.log(result);
                 return "success"

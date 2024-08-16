@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -115,5 +115,57 @@ export class StatusService {
         } catch (error) {
             console.log("Get Status error: " + error);
         }
+    }
+
+    async deleteStatus(id: number)
+    {
+        const check = await this.prisma.status.findUnique({
+            where: {
+                id: Number(id)
+            },
+            include: {
+                tasks: {
+                    include: {
+                        taskChange: true,
+                        taskComment: true,
+                        taskUser: true
+                    }
+                }
+            }
+        });
+
+        if(!check) throw new NotFoundException("Status not found");
+
+        if (check.tasks.length > 0) {
+            for (const task of check.tasks) {
+                try {
+                    await this.prisma.taskComment.deleteMany({
+                        where: { task_id: Number(task.id) }
+                    });
+        
+                    await this.prisma.taskChange.deleteMany({
+                        where: { task_id: Number(task.id) }
+                    });
+        
+                    await this.prisma.taskUser.deleteMany({
+                        where: { task_id: Number(task.id) }
+                    });
+        
+                    await this.prisma.task.delete({
+                        where: { id: Number(task.id) }
+                    });
+                } catch (error) {
+                    console.log("Project task delete error: " + error);
+                }
+            }
+        }
+        
+        await this.prisma.status.delete({
+            where: {
+                id: Number(check.id)
+            }
+        })
+
+        return "Successfully deleted"
     }
 }
