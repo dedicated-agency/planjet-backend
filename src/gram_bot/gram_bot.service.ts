@@ -150,11 +150,14 @@ Assignments welcome to the managing bot\n
         try {
             const message: any = await this.client.getMessages(chatId, {ids: messageId, limit: 1});
 
+            if(!message)
+            {
+                await this.sendMessage(chatId, "Bot is not admin, Please check admin permissions", messageId);
+            }
 
             const usernameRegex = /@\w+/g;
             const usernames =  message[0].message.match(usernameRegex);
             const messageText =  message[0].message.replace(usernameRegex, '').trim();
-
     
             const task = await this.taskService.init({
                 topic_id: topic.topic_id ? topic.topic_id : Number(topic.id),
