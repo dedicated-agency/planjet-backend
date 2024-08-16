@@ -46,14 +46,48 @@ export class UserService {
 
     async tasks(user_id: string, status: number)
     {
-        const project = await this.prisma.project.findFirst({
+        let project = await this.prisma.project.findFirst({
             where: {
                 topic_id: user_id,
                 name: "mytasks"
             }
         });
 
-        if(!project) throw new NotFoundException("Project not found");
+        if(!project){
+            project = await this.prisma.project.create({
+                data: {
+                    topic_id: user_id,
+                    name: "mytasks"
+                }
+            });
+
+
+            let statuses: any = await this.prisma.status.findMany({
+                where: {
+                    project_id: Number(project.id)
+                }
+            });
+
+            // if(statuses.length === 0)
+            // {
+            //     statuses = await this.prisma.status.createMany({
+            //         data: this.statusList.map((element) => ({
+            //             name: element.name,
+            //             order: element.id,
+            //             project_id: Number(project.id) 
+            //         }))
+            //     });
+            // }
+
+            const status = await this.prisma.status.findFirst({
+                where: {
+                    project_id: Number(project.id)
+                },
+                orderBy: {
+                    order: "asc"
+                }
+            })
+        } 
 
         const project_id = project.id;
 

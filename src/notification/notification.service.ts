@@ -12,19 +12,12 @@ export class NotificationService {
     {
         const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
         try {
-            console.log(
-                chat_id, change_id, lang, type, task
-            );
+            // console.log(
+            //     chat_id, change_id, lang, type, task
+            // );
             
             if(task && type === "createTask")
             {
-                // console.log({
-                //     chat_id: "-100" + chat_id,
-                //     text: this.createTask(lang, task),
-                //     parse_mode: 'html',
-                //     message_thread_id: task.project.topic_id,
-                // });
-
 
                 const data: any = {
                     chat_id: "-100" + chat_id,
@@ -39,6 +32,7 @@ export class NotificationService {
     
                 
                 const result = await axios.post(url, data);
+                console.log(result);
                 return "success"
             }else{
                 const change = await this.prisma.taskChange.findUnique({
@@ -60,14 +54,6 @@ export class NotificationService {
                     console.log('change not found in messageShaper')
                     return 
                 }
-    
-                // console.log({
-                //     change,
-                //     chat_id: chat_id,
-                //     text: this.messageShaper(lang, change),
-                //     message_thread_id: change.task.project.topic_id,
-                //     parse_mode: 'HTML',
-                // })
 
                 const data: any = {
                     chat_id: "-100" + chat_id,

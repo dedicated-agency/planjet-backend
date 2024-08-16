@@ -148,11 +148,13 @@ Assignments welcome to the managing bot\n
     private async createTask(chatId: any, messageId: number, userId: number, topic: {title?: string, id: number, name?: string, topic_id?: number})
     {
         try {
-            const message: any = await this.client.getMessages(chatId, {ids: messageId});
+            const message: any = await this.client.getMessages(chatId, {ids: messageId, limit: 1});
+
 
             const usernameRegex = /@\w+/g;
             const usernames =  message[0].message.match(usernameRegex);
             const messageText =  message[0].message.replace(usernameRegex, '').trim();
+
     
             const task = await this.taskService.init({
                 topic_id: topic.topic_id ? topic.topic_id : Number(topic.id),

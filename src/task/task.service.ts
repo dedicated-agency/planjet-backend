@@ -146,7 +146,6 @@ export class TaskService {
         });
 
         if(!project) throw new NotFoundException("Project not found");
-
         
         const check = await this.prisma.task.findFirst({
             where: {
