@@ -143,7 +143,7 @@ export class TaskService {
             where: {
                 topic_id: String(topic_id),
                 name: topic_title,
-                group_id: group_id
+                group_id: String(group_id)
             }
         });
 
