@@ -12,11 +12,15 @@ export class NotificationService {
     {
         const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
         try {
-            // console.log(
-            //     chat_id, change_id, lang, type, task
-            // );
+            const project = await this.prisma.project.findUnique({
+                where: {
+                    id: task.project_id
+                }
+            });
+
             
-            if(task && type === "createTask")
+            
+            if(task && type === "createTask" && project.add_permission)
             {
 
                 const data: any = {
@@ -34,7 +38,7 @@ export class NotificationService {
                 const result = await axios.post(url, data);
                 console.log(result);
                 return "success"
-            }else{
+            }else if(project.status_permission){
                 const change = await this.prisma.taskChange.findUnique({
                     where: {
                         id: Number(change_id)
