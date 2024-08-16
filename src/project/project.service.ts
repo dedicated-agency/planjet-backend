@@ -205,7 +205,6 @@ export class ProjectService {
             
             if (check.statuses.length > 0) {
                 try {
-                    // Assuming statuses have relationships that need to be deleted first
                     await this.prisma.status.deleteMany({
                         where: {
                             id: {
