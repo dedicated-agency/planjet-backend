@@ -12,14 +12,28 @@ export class NotificationService {
     {
         const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
         try {
-            const project = await this.prisma.project.findUnique({
+            const change = await this.prisma.taskChange.findUnique({
                 where: {
-                    id: task.project_id
+                    id: Number(change_id)
+                },
+                include: {
+                    task: {
+                        include: {
+                            project: true,
+                            user: true,
+                            status: true,
+                        }
+                    },
+                    user: true,
                 }
             });
-            
+
+
+            const project = change.task.project;
+
             if(task && type === "createTask" && project.add_permission)
             {
+
                 const data: any = {
                     chat_id: "-100" + chat_id,
                     text: this.createTask(lang, task),
@@ -35,21 +49,7 @@ export class NotificationService {
                 console.log(result);
                 return "success"
             }else if(project.add_permission){
-                const change = await this.prisma.taskChange.findUnique({
-                    where: {
-                        id: Number(change_id)
-                    },
-                    include: {
-                        task: {
-                            include: {
-                                project: true,
-                                user: true,
-                                status: true,
-                            }
-                        },
-                        user: true,
-                    }
-                });
+                
                 if (!change) {
                     console.log('change not found in messageShaper')
                     return 
