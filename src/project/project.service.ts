@@ -226,4 +226,36 @@ export class ProjectService {
 
             return "SUccessfullt deleted"
     }
+
+    async notification(id: number, type: string, value: boolean)
+    {
+        const project = await this.prisma.project.findUnique({
+            where: {
+                id: Number(id)
+            }
+        });
+
+        if(!project) throw new NotFoundException("Project not found");
+
+        const data: any = {};
+
+        if(type === 'create')
+        {
+            data.add_permission = value
+        }else if(type === 'status')
+        {
+            data.status_permission = value
+        }
+
+        try {
+            return await this.prisma.project.update({
+                where: {
+                    id: Number(id)
+                },
+                data
+            })
+        } catch (error) {
+            console.log("Edit permission error " + error);
+        }
+    }
 }

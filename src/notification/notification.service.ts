@@ -87,7 +87,7 @@ ${languages[lang].project}: <b>${change.task.project.name} 💻</b>
 
 ${languages[lang].author}: <b>${change.task.user.username ? "<a href='https://t.me/" + change.task.user.username + "'>" + change.task.user.name + "</a>" : change.task.user.name }</b>
    
-${languages[lang][change.type]}: <b>${change.old_value} ➡️ ${change.new_value}</b> 
+${languages[lang][change.type]}: <b>${change.old_value} ➡️  ${change.new_value}</b> 
 `
         } catch (error) {
             console.log("Error messageShaper: " + error);
