@@ -34,7 +34,7 @@ export class NotificationService {
                 const result = await axios.post(url, data);
                 console.log(result);
                 return "success"
-            }else if(project.status_permission){
+            }else if(project.add_permission){
                 const change = await this.prisma.taskChange.findUnique({
                     where: {
                         id: Number(change_id)
@@ -65,13 +65,20 @@ export class NotificationService {
                 {
                     data.message_thread_id = change.task.project.topic_id
                 }
-    
-                const result = await axios.post(url, data);
+
+                console.log({
+                    project
+                });
+                
+                if(project.status_permission)
+                {
+                    const result = await axios.post(url, data);
+                }
                 return "success"
             }
            
         } catch (error) {
-            console.log('send error' +  error.response ? error.response.data : error.message);
+            console.log('send error' +  error);
         }
     }
 
