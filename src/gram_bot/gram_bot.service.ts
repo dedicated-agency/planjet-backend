@@ -201,7 +201,7 @@ Assignments welcome to the managing bot\n
                 });
                 if(checkChange)
                 {
-                    await this.notificationService.send(gotTask.project.group_id, 13, gotTask.user.language_code, "createTask", gotTask);
+                    await this.notificationService.send(gotTask.project.group_id, checkChange.id, gotTask.user.language_code, "createTask", gotTask);
                 }
             }
      

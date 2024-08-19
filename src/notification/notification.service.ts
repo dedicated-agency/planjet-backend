@@ -28,15 +28,12 @@ export class NotificationService {
                 }
             });
 
-
             const project = change.task.project;
 
             console.log(project);
             
-
             if(task && type === "createTask" && project.add_permission)
             {
-
                 const data: any = {
                     chat_id: "-100" + chat_id,
                     text: this.createTask(lang, task),
