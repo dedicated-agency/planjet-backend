@@ -126,4 +126,17 @@ export class TaskController {
     const {user} = req;
     return response.json(await this.taskService.comment(user.telegram_id, id, text))
   }
+
+  @Put(':id/participant')
+  @UseGuards(UserGuard)
+  async participant(
+    @Body("participant") participant: number[],
+    @Res() response: Response,
+    @Req() req,
+    @Param("id") id: number,
+  ){
+    const {user} = req;
+    return response.json(await this.taskService.participant(id, participant, user.telegram_id));
+  }
+
 }

@@ -23,7 +23,12 @@ export const languages = {
         "file": "Fayl",
         "change": "o'zgartirish",
         "priority": "ustuvorlik",
-        'task_created': "Yangi task yaratildi"
+        'task_created': "Yangi task yaratildi",
+        "add_bot_to_group": "Manager muvaffaqyatli qo'shildi",
+        "open_app": "Ilovani ochish",
+        "add_task": "Vazifa qo'shish",
+        "tasks": "Loyiha vazifalari",
+        "task_done": "Vazifa muvaffaqiyatli tugallandi"
     },
     "en": {
         "my_tasks": "My tasks",
@@ -49,7 +54,12 @@ export const languages = {
         "file": "File",
         "change": "change",
         "priority": "priority",
-        'task_created': "New task created"
+        'task_created': "New task created",
+        "add_bot_to_group": "Manager successfully added",
+        "open_app": "Open the app",
+        "add_task": "Add task",
+        "tasks": "Project tasks",
+        "task_done": "The task is successfully completed"
     },
     "ru": {
         "my_tasks": "Мои задачи",
@@ -75,6 +85,11 @@ export const languages = {
         "file": "Файлы",
         "change": "менять",
         "priority": "приоритет",
-        'task_created': "Создана новая задача"
+        'task_created': "Создана новая задача",
+        "add_bot_to_group": "Менеджер успешно добавлен",
+        "open_app": "Открыть приложение",
+        "add_task": "Добавить задачу",
+        "tasks": "Задачи проекта",
+        "task_done": "Задача успешно выполнена"
     }
 }

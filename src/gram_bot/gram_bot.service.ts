@@ -64,7 +64,8 @@ export class GramBotService implements OnModuleInit {
     
             this.client.addEventHandler(this.handleNewMessage.bind(this), new NewMessage({}));
             // this.client.addEventHandler(this.handleNewReaction.bind(this), new EditedMessage({}));
-            // this.client.addEventHandler(this.checkListener.bind(this), new EventBuilder({}))
+            // this.client.addEventHandler(this.checkListener.bind(this), new EventBuilder({}));
+            this.client.addEventHandler(async (update) => this.handleAddBotToGroup(update));
 
             this.logger.log('Bot is up and running!');
             return; 
@@ -84,6 +85,18 @@ export class GramBotService implements OnModuleInit {
         }
       }
 
+    private async handleAddBotToGroup(update)
+    {
+        console.log(update);
+        
+        if (update && update.className === 'UpdateChannelParticipant') {
+            console.log('Bot was added to a group or channel!');
+    
+            // Send a message when added to a group
+            await this.sendMessage(update.message.peerId, `Thanks for adding me to the group!`)
+          }
+    }
+
 
     private async checkListener(event)
     {
@@ -98,7 +111,6 @@ export class GramBotService implements OnModuleInit {
         // }
         // this.getChannelTopics("s")
     }
-  
 
 
     private async handleNewMessage(event: any) {

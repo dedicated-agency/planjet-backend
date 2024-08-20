@@ -29,8 +29,6 @@ export class NotificationService {
             });
 
             const project = change.task.project;
-
-            console.log(project);
             
             if(task && type === "createTask" && project.add_permission)
             {
@@ -46,7 +44,6 @@ export class NotificationService {
                 }
     
                 const result = await axios.post(url, data);
-                console.log(result);
                 return "success"
             }else if(project.add_permission){
                 
@@ -65,10 +62,6 @@ export class NotificationService {
                 {
                     data.message_thread_id = change.task.project.topic_id
                 }
-
-                console.log({
-                    project
-                });
                 
                 if(project.status_permission)
                 {
@@ -84,7 +77,6 @@ export class NotificationService {
 
     messageShaper(lang: string = 'en', change: any)
     {
-        // (status, priority, name, deadline)
         try {
             return `#${languages[lang].change} by ${change.user.name}
 
@@ -116,6 +108,23 @@ ${languages[lang].author}: <b>${task.user.username ? "<a href='https://t.me/" + 
 `
         } catch (error) {
             console.log("Error createTask: " + error);
+        }
+    }
+
+    addBotToChannel(lang: string = 'en')
+    {
+        try {
+            return `${languages[lang].add_bot_to_group}
+
+/manager ${languages[lang].open_app}
+
+/add ${languages[lang].add_task}
+
+/tasks ${languages[lang].tasks}
+
+/done ${languages[lang].task_done}`
+        } catch (error) {
+            console.log("Error add Bot to Channel: " + error);
         }
     }
 }

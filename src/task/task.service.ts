@@ -194,16 +194,28 @@ export class TaskService {
                 orderBy: {
                     order: "asc"
                 }
-            })
+            });
+
+            let description = "";
+            let title = name;
+            if(name.length > 190)
+            {
+                description = name;
+                title = name.substring(0, 50) + "..."
+            }
+
+            const data: any = {
+                status_id: Number(status.id),
+                project_id: Number(project.id),
+                message_id: Number(message_id),
+                user_id: String(user_id),
+                name: title,
+                description,
+                participants: `${user_id}`
+            }
+
             return await this.prisma.task.create({
-                data: {
-                    status_id: Number(status.id),
-                    project_id: Number(project.id),
-                    message_id: Number(message_id),
-                    user_id: String(user_id),
-                    name,
-                    participants: `${user_id}`
-                }
+                data: data
             });  
         }
 
@@ -554,6 +566,40 @@ export class TaskService {
         } catch (error) {
             console.log("create commment error: " + error);
             throw new NotFoundException("Task not found"); 
+        }
+    }
+
+    async participant(id: number, participant: number[], telegram_id: number)
+    {
+        const task = await this.prisma.task.findUnique({
+            where: {
+                id: Number(id)
+            },
+            include: {
+                taskUser: true
+            }
+        });
+
+        if(!task) throw new NotFoundException("Task not found");
+
+        try {
+            if(participant.length > 0)
+            {
+                const task_participant = task.taskUser.map(taskUser => taskUser.user_id);
+
+                participant.map(async (participant_element) => {
+                    const check = await this.prisma.taskUser.findFirst({
+                        where: {
+                            user_id: String(participant_element),
+                            task_id: Number(id)
+                        }
+                    });
+
+                    
+                })
+            }
+        } catch (error) {
+            console.log("Update participant error: " + error);
         }
     }
 }
