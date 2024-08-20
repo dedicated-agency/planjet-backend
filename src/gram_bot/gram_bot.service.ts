@@ -93,7 +93,9 @@ export class GramBotService implements OnModuleInit {
             console.log('Bot was added to a group or channel!');
     
             // Send a message when added to a group
-            await this.sendMessage(update.message.peerId, `Thanks for adding me to the group!`)
+            await this.notificationService.addBotToChannel(Number(update.message.peerId));
+        
+            // await this.sendMessage(update.message.peerId, `Thanks for adding me to the group!`)
           }
     }
 
