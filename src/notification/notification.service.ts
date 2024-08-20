@@ -92,9 +92,29 @@ ${languages[lang].author}: <b>${task.user.username ? "<a href='https://t.me/" + 
         }
     }
 
-    async addBotToChannel(chat_id: number, lang: string = 'en')
+    async addBotToChannel(chat_id: number, lang: string = 'en', message_id?: number)
     {
-   
+        const inlineKeyboard = {
+            inline_keyboard: [
+              [
+                {
+                  text: 'Click me',
+                    url: String(process.env.TELEGRAM_WEB_APP_URL)
+                //   callback_data: 
+                }
+              ]
+            ]
+        };
+
+        const data: any = {
+            chat_id: `-100${Number(chat_id)}`,
+            text: '',
+            parse_mode: 'html',
+            reply_markup: inlineKeyboard
+        };
+
+        if(message_id) { data.message_thread_id = message_id }
+
         try {
              const text = `${languages[lang].add_bot_to_group}
 
@@ -104,17 +124,20 @@ ${languages[lang].author}: <b>${task.user.username ? "<a href='https://t.me/" + 
 
 /tasks ${languages[lang].tasks}
 
-/done ${languages[lang].task_done}`
+/done ${languages[lang].task_done}`;
 
-            const data: any = {
-                chat_id: `-100${chat_id}`,
-                text,
-                parse_mode: 'html',
-            };
+            
+            data.text = text
             await axios.post(this.url, data);
             return "success";
         } catch (error) {
             console.log("Error add Bot to Channel: " + error);
+            console.log(error);
         }
+    }
+
+    async getProjectTask()
+    {
+ 
     }
 }

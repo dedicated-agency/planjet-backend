@@ -87,17 +87,13 @@ export class GramBotService implements OnModuleInit {
 
     private async handleAddBotToGroup(update)
     {
-        console.log(update);
-        
         if (update && update.className === 'UpdateChannelParticipant') 
         {
             console.log('Bot was added to a group or channel!');
     
-            // Send a message when added to a group
             await this.notificationService.addBotToChannel(Number(update.channelId));
         }
     }
-
 
     private async checkListener(event)
     {
@@ -113,7 +109,6 @@ export class GramBotService implements OnModuleInit {
         // this.getChannelTopics("s")
     }
 
-
     private async handleNewMessage(event: any) {
         const message = event.message;
 
@@ -127,7 +122,7 @@ export class GramBotService implements OnModuleInit {
             console.log(`Received message: ${messageText}`);
 
             try {
-                if(messageText !== "/start")
+                if(messageText !== "/start" && messageText !== "/manager" && messageText !== "/add")
                 {
                     await this.getChannel(message.peerId.channelId)
                     topic = await this.getChannelTopics(message.peerId.channelId, messageId)
@@ -145,7 +140,7 @@ Assignments welcome to the managing bot\n
                 await this.sendPermissionImage(message.peerId.userId)
             }else if(messageText === "/manager")
             {
-                await this.sendMessage(chatId, process.env.TELEGRAM_WEB_APP_URL, messageId);
+                await this.notificationService.addBotToChannel(chatId.channelId, 'en')
             }else if(messageText === "/add")
             {
                 if(message.replyTo && topic)
@@ -154,6 +149,9 @@ Assignments welcome to the managing bot\n
                 }else{
                     await this.sendMessage(chatId, "Task not found", messageId);
                 }
+            }else if(messageText === "/tasks")
+            {
+                
             }
         }
     }
