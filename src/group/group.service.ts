@@ -109,19 +109,45 @@ export class GroupService {
     async showById(user_id: number, id: number)
     {
         try {
-            return await this.prisma.group.findUnique({
+            const group: any = await this.prisma.group.findUnique({
                 where: {
                     id: String(id)
                 },
                 include: {
                     projects: {
                         include: {
-                            tasks: true
+                            tasks: {
+                                include: {
+                                    status: true
+                                }
+                            }
                         }
                     },
                     groupUsers: true,
                 }
             });
+
+            if(group.projects.length)
+            {
+                const projects: any[] = [];
+                group.projects.map((project: any) => {
+                    const tasks: any[] = [];
+                    if(project.tasks.length > 0)
+                    {
+                        project.tasks.map((task: any) => {
+                            if(task.status?.order === 1)
+                            {
+                                tasks.push(task)
+                            }
+                        });
+                    }
+                    project.tasks = tasks;
+                    projects.push(project);
+                });
+                group.projects = projects;
+            }
+
+            return group;
         } catch (error) {
             console.log("Group show by id" + error);
         }
