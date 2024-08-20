@@ -273,11 +273,26 @@ export class TaskService {
                 }
             });
             if(!task) throw new NotFoundException("Task not found");
-            const status = await this.prisma.status.findUnique({
-                where: {
-                    id: Number(status_id)
-                }
-            });
+
+            let status: any = "";
+
+            if(status_id === -1)
+            {
+                status = await this.prisma.status.findFirst({
+                    where: {
+                        name: "Completed",
+                        project_id: Number(task.project_id)
+                    }
+                });
+                status_id = status.id
+            }else{
+                status = await this.prisma.status.findUnique({
+                    where: {
+                        id: Number(status_id)
+                    }
+                });
+            }
+        
             if(!status) throw new NotFoundException("Status not available");
             const data: any = {
                 status_id: Number(status_id)

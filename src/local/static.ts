@@ -28,7 +28,8 @@ export const languages = {
         "open_app": "Ilovani ochish",
         "add_task": "Vazifa qo'shish",
         "tasks": "Loyiha vazifalari",
-        "task_done": "Vazifa muvaffaqiyatli tugallandi"
+        "task_done": "Vazifa muvaffaqiyatli tugallandi",
+        "manager_commands": "Menejer buyruqlari"
     },
     "en": {
         "my_tasks": "My tasks",
@@ -59,7 +60,8 @@ export const languages = {
         "open_app": "Open the app",
         "add_task": "Add task",
         "tasks": "Project tasks",
-        "task_done": "The task is successfully completed"
+        "task_done": "The task is successfully completed",
+        "manager_commands": "Manager commands"
     },
     "ru": {
         "my_tasks": "Мои задачи",
@@ -90,6 +92,7 @@ export const languages = {
         "open_app": "Открыть приложение",
         "add_task": "Добавить задачу",
         "tasks": "Задачи проекта",
-        "task_done": "Задача успешно выполнена"
+        "task_done": "Задача успешно выполнена",
+        "manager_commands": "Команды менеджера"
     }
 }

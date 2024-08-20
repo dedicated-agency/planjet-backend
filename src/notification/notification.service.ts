@@ -76,7 +76,6 @@ ${languages[lang][change.type]}: <b>${change.old_value} ➡️  ${change.new_val
     createTask(lang: string = 'en', task: any)
     {
         try {
-            
             return `#task by ${task.user.name}
 
 <a href='https://t.me/dedicated_task_manager_bot/Task_Manager?startapp=tasks_${task.id}'>${task.name}</a>
@@ -92,15 +91,14 @@ ${languages[lang].author}: <b>${task.user.username ? "<a href='https://t.me/" + 
         }
     }
 
-    async addBotToChannel(chat_id: number, lang: string = 'en', message_id?: number)
+    async addBotToChannel(chat_id: number, lang: string = 'en', topic?: any)
     {
         const inlineKeyboard = {
             inline_keyboard: [
               [
                 {
-                  text: 'Click me',
+                  text: languages[lang].open_app,
                     url: String(process.env.TELEGRAM_WEB_APP_URL)
-                //   callback_data: 
                 }
               ]
             ]
@@ -113,10 +111,10 @@ ${languages[lang].author}: <b>${task.user.username ? "<a href='https://t.me/" + 
             reply_markup: inlineKeyboard
         };
 
-        if(message_id) { data.message_thread_id = message_id }
+        if(topic) { data.message_thread_id = topic.topic_id ? topic.topic_id : Number(topic.id) }
 
         try {
-             const text = `${languages[lang].add_bot_to_group}
+             const text = `${topic ? languages[lang].manager_commands : languages[lang].add_bot_to_group}
 
 /manager ${languages[lang].open_app}
 

@@ -122,7 +122,7 @@ export class GramBotService implements OnModuleInit {
             console.log(`Received message: ${messageText}`);
 
             try {
-                if(messageText !== "/start" && messageText !== "/manager" && messageText !== "/add")
+                if(messageText !== "/start")
                 {
                     await this.getChannel(message.peerId.channelId)
                     topic = await this.getChannelTopics(message.peerId.channelId, messageId)
@@ -133,15 +133,14 @@ export class GramBotService implements OnModuleInit {
             if(messageText === "/start")
             {
                 await this.getFullUser(message.peerId.userId)
-                
-                await this.sendMessage(chatId, `Topshiriqlar boshqaruvchi botiga xush kelibsiz\n
-Assignments welcome to the managing bot\n
-Задания добро пожаловать в управляющий бот`);
+                await this.sendMessage(chatId, `Topshiriqlar boshqaruvchi botiga xush kelibsiz\nAssignments welcome to the managing bot\nЗадания добро пожаловать в управляющий бот`);
                 await this.sendPermissionImage(message.peerId.userId)
-            }else if(messageText === "/manager")
+            }
+            else if(messageText === "/manager")
             {
-                await this.notificationService.addBotToChannel(chatId.channelId, 'en')
-            }else if(messageText === "/add")
+                await this.notificationService.addBotToChannel(chatId.channelId, 'en', topic)
+            }
+            else if(messageText === "/add")
             {
                 if(message.replyTo && topic)
                 {
@@ -149,10 +148,49 @@ Assignments welcome to the managing bot\n
                 }else{
                     await this.sendMessage(chatId, "Task not found", messageId);
                 }
-            }else if(messageText === "/tasks")
+            }
+            else if(messageText === "/tasks")
             {
                 
             }
+            else if(messageText === "/done")
+            {
+                if(message.replyTo && topic)
+                {
+                    await this.doneTask(chatId, message.replyTo.replyToMsgId, message.fromId.userId, topic);
+                }else{
+                    await this.sendMessage(chatId, "Task not found", messageId);
+                }
+            }
+        }
+    }
+
+    private async doneTask(chatId: any, messageId: number, userId: number, topic: {title?: string, id: number, name?: string, topic_id?: number})
+    {
+        try {
+            const task = await this.prisma.task.findFirst({
+                where: {
+                    message_id: messageId
+                }
+            });
+                
+            const result = await this.taskService.updateStatus(userId, -1, task.id);
+            if(result.message === "Status successfully changed")
+            {
+                const result = await this.client.invoke(
+                    new Api.messages.SendReaction({
+                      peer: Number(chatId.channelId),
+                      msgId: messageId,
+                      big: true,
+                    //   @ts-ignore
+                      reaction: "👍",
+                    })
+                  );
+                  console.log(result);
+            }
+    
+        } catch (error) {
+            console.log("Create task error " + error);
         }
     }
 
