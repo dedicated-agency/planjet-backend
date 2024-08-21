@@ -186,7 +186,7 @@ export class GramBotService implements OnModuleInit {
                         peer: Number(task.project.group_id),
                         msgId: Number(messageId),
                         //   @ts-ignore
-                        reaction: "👍",
+                        reaction: "U+1F601",
                     })
                   );
                   console.log(result1);
@@ -203,8 +203,6 @@ export class GramBotService implements OnModuleInit {
     {
         try {
             const message: any = await this.client.getMessages(chatId, {ids: messageId, limit: 1});
-
-            console.log({message});
 
             if(message.length === 1 && message[0] === undefined)
             {

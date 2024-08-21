@@ -40,34 +40,45 @@ export class NotificationService {
             
             if(task && type === "createTask" && project.add_permission)
             {
-                data.text = this.createTask(lang, task);
-            }else if(project.status_permission){
+                const makedMsg = this.createTask(lang, task)
+                data.text = makedMsg.text;
+                data.reply_markup = makedMsg.inlineKeyboard
+            }else if(project.status_permission && change.type !== "created"){
                 if (!change) {
                     console.log('change not found in messageShaper')
                     return 
                 }
-                data.text = this.messageShaper(lang, change);
+                const makedMsg = this.messageShaper(lang, change)
+                data.text = makedMsg.text;
+                data.reply_markup = makedMsg.inlineKeyboard
             }
-            await axios.post(this.url, data);
+            if(data.text)
+            {
+                await axios.post(this.url, data);
+            }
             return "success"
         } catch (error) {
             console.log('send error' +  error);
+            console.log(error.message);
         }
     }
 
     messageShaper(lang: string = 'en', change: any)
     {
         try {
-            return `#${languages[lang].change} by ${change.user.name}
+            return {
+                text: `#${languages[lang].change} by ${change.user.name}
 
-<a href='https://t.me/dedicated_task_manager_bot/Task_Manager?startapp=tasks_${change.task_id}'>${change.task.name}</a>
+<b>${change.task.name}</b>
 
 ${languages[lang].project}: <b>${change.task.project.name} 💻</b>
 
-${languages[lang].author}: <b>${change.task.user.username ? "<a href='https://t.me/" + change.task.user.username + "'>" + change.task.user.name + "</a>" : change.task.user.name }</b>
+${languages[lang].author}: <b>${change.task.user.name}</b>
    
 ${languages[lang][change.type]}: <b>${change.old_value} ➡️  ${change.new_value}</b> 
-`
+`,
+    inlineKeyboard: this.inlineKeyboard(`https://t.me/dedicated_task_manager_bot/Task_Manager?startapp=tasks_${change.task_id}`)
+}
         } catch (error) {
             console.log("Error messageShaper: " + error);
         }
@@ -76,16 +87,19 @@ ${languages[lang][change.type]}: <b>${change.old_value} ➡️  ${change.new_val
     createTask(lang: string = 'en', task: any)
     {
         try {
-            return `#task by ${task.user.name}
+            return {
+                text: `#task by ${task.user.name}
 
-<a href='https://t.me/dedicated_task_manager_bot/Task_Manager?startapp=tasks_${task.id}'>${task.name}</a>
+<b>${task.name}</b>
 
 ${languages[lang].project}: <b>${task.project.name} 💻</b>
 
-${languages[lang].author}: <b>${task.user.username ? "<a href='https://t.me/" + task.user.username + "'>" + task.user.name + "</a>" : task.user.name }</b>
+${languages[lang].author}: <b>${task.user.name}</b>
    
 <b>${languages[lang].task_created}</b> 
-`
+`,
+    inlineKeyboard: this.inlineKeyboard(`https://t.me/dedicated_task_manager_bot/Task_Manager?startapp=tasks_${task.id}`)
+}
         } catch (error) {
             console.log("Error createTask: " + error);
         }
@@ -134,8 +148,17 @@ ${languages[lang].author}: <b>${task.user.username ? "<a href='https://t.me/" + 
         }
     }
 
-    async getProjectTask()
+    inlineKeyboard(url: string, lang: string = 'en')
     {
- 
+        return {
+            inline_keyboard: [
+                [
+                    {
+                        text: languages[lang].open_app,
+                        url: url
+                    }
+                ]
+            ]
+        };
     }
 }
