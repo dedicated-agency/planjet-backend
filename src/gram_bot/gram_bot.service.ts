@@ -171,26 +171,31 @@ export class GramBotService implements OnModuleInit {
             const task = await this.prisma.task.findFirst({
                 where: {
                     message_id: messageId
+                },
+                include: {
+                    project: true
                 }
             });
                 
             const result = await this.taskService.updateStatus(userId, -1, task.id);
+            console.log({result})
             if(result.message === "Status successfully changed")
             {
-                const result = await this.client.invoke(
+                const result1 = await this.client.invoke(
                     new Api.messages.SendReaction({
-                      peer: Number(chatId.channelId),
-                      msgId: messageId,
-                      big: true,
-                    //   @ts-ignore
-                      reaction: "👍",
+                        peer: Number(task.project.group_id),
+                        msgId: Number(messageId),
+                        //   @ts-ignore
+                        reaction: "👍",
                     })
                   );
-                  console.log(result);
+                  console.log(result1);
             }
     
         } catch (error) {
             console.log("Create task error " + error);
+            console.log(error);
+            
         }
     }
 
@@ -199,9 +204,12 @@ export class GramBotService implements OnModuleInit {
         try {
             const message: any = await this.client.getMessages(chatId, {ids: messageId, limit: 1});
 
-            if(!message)
+            console.log({message});
+
+            if(message.length === 1 && message[0] === undefined)
             {
                 await this.sendMessage(chatId, "Bot is not admin, Please check admin permissions", messageId);
+                return
             }
 
             const usernameRegex = /@\w+/g;

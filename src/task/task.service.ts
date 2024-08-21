@@ -262,6 +262,7 @@ export class TaskService {
 
     async updateStatus(user_id: number, status_id: number, id: number)
     {
+        let status_ID = status_id;
         try {
             const task = await this.prisma.task.findUnique({
                 where: {
@@ -275,27 +276,27 @@ export class TaskService {
             if(!task) throw new NotFoundException("Task not found");
 
             let status: any = "";
-
-            if(status_id === -1)
+            console.log({status_ID, task});
+            if(status_ID === -1)
             {
-                status = await this.prisma.status.findFirst({
+                const checkStatus = await this.prisma.status.findFirst({
                     where: {
                         name: "Completed",
                         project_id: Number(task.project_id)
                     }
-                });
-                status_id = status.id
+                })
+                console.log({status_ID, task, checkStatus});
             }else{
                 status = await this.prisma.status.findUnique({
                     where: {
-                        id: Number(status_id)
+                        id: Number(status_ID)
                     }
                 });
             }
         
             if(!status) throw new NotFoundException("Status not available");
             const data: any = {
-                status_id: Number(status_id)
+                status_id: Number(status_ID)
             }
             if(status.name === "Завершено" || status.name === "Tugallangan" || status.name === "Completed"){
                 data.is_completed = true;
@@ -327,6 +328,7 @@ export class TaskService {
 
         } catch (error) {
             console.log("Update status task: " + error);
+            console.log(error);
         }
     }
 
