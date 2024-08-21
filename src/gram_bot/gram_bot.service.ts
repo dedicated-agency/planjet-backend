@@ -485,7 +485,7 @@ Give these permissions to file from the service\n
                     const change = await this.prisma.taskChange.create({
                         data: {
                             user_id: String(userId),
-                            task_id: Number(oldComment.id),
+                            task_id: Number(oldComment.task_id),
                             type: "status",
                             old_value: "comment",
                             new_value: text
