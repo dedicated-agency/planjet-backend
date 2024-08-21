@@ -124,8 +124,8 @@ ${languages[lang].author}: <b>${task.user.name}</b>
             parse_mode: 'html',
             reply_markup: inlineKeyboard
         };
-
-        if(topic && topic.topic_id && Number(topic.topic_id) !== 1) { data.message_thread_id = topic.topic_id }
+        
+        if(topic && topic.id) { data.message_thread_id = topic.id }
 
         try {
              const text = `${topic ? languages[lang].manager_commands : languages[lang].add_bot_to_group}

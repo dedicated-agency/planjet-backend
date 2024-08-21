@@ -55,7 +55,7 @@ export class GramBotService implements OnModuleInit {
     private async connectToTelegram() {
         let retries = 0;
         const maxRetries = 3;
-        const baseDelay = 1500; // Start with 1 second
+        const baseDelay = 1500; 
     
         while (retries < maxRetries) {
           try {
@@ -66,7 +66,7 @@ export class GramBotService implements OnModuleInit {
     
             this.client.addEventHandler(this.handleNewMessage.bind(this), new NewMessage({}));
             // this.client.addEventHandler(this.handleNewReaction.bind(this), new EditedMessage({}));
-            this.client.addEventHandler(this.checkListener.bind(this), new EventBuilder({}));
+            this.client.addEventHandler(this.handleDoneReaction.bind(this), new EventBuilder({}));
             this.client.addEventHandler(async (update) => this.handleAddBotToGroup(update));
 
             this.logger.log('Bot is up and running!');
@@ -74,7 +74,7 @@ export class GramBotService implements OnModuleInit {
           } catch (error) {
             this.logger.error(`Failed to connect to Telegram: ${error.message}`);
             if (error.code === 420 && error.errorMessage === 'FLOOD') {
-              const waitTime = error.seconds * 1000; // Convert to milliseconds
+              const waitTime = error.seconds * 1000;
               this.logger.warn(`FloodWaitError: Waiting for ${waitTime / 1000} seconds`);
               await this.delay(waitTime);
               retries++;
@@ -97,7 +97,7 @@ export class GramBotService implements OnModuleInit {
         }
     }
 
-    private async checkListener(event)
+    private async handleDoneReaction(event)
     {
         if(event)
         {
@@ -167,6 +167,10 @@ export class GramBotService implements OnModuleInit {
                 }else{
                     await this.sendMessage(chatId, "Task not found", messageId);
                 }
+            }
+            else if(message.replyTo)
+            {
+                await this.commentCreate(message.replyTo.replyToMsgId, message.fromId.userId, messageId, messageText)
             }
         }
     }
@@ -274,16 +278,6 @@ export class GramBotService implements OnModuleInit {
             console.log("Create task error " + error);
         }
     }    
-
-    private async handleNewReaction(event: any) {
-        console.log({
-            originalUpdate: event.originalUpdate?.message,
-            event,
-            message: event.message,
-            replyTo: event.message.replyTo
-        });
-        
-    }
 
     private delay(ms: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -439,5 +433,69 @@ Give these permissions to file from the service\n
             console.log("remove message: " + error.message);
         }
     }
+
+    private async commentCreate(messageId: number, userId: number, commentId: number, text: string)
+    {
+        const checkTask = await this.prisma.task.findFirst({
+            where: {
+                message_id: Number(messageId)
+            }
+        });
+
+        if(checkTask)
+        {
+            const comment = await this.prisma.taskComment.create({
+                data: {
+                    task_id: checkTask.id,
+                    user_id: String(userId),
+                    message_id: String(commentId),
+                    comment: text
+                }
+            });
+            if(comment)
+            {
+                const change = await this.prisma.taskChange.create({
+                    data: {
+                        user_id: String(userId),
+                        task_id: Number(checkTask.id),
+                        type: "status",
+                        old_value: "comment",
+                        new_value: text
+                    }
+                });
+            }
+        }else{
+            const oldComment = await this.prisma.taskComment.findFirst({
+                where: {
+                    message_id: String(messageId)
+                }
+            });
+            if(oldComment)
+            {
+                const comment = await this.prisma.taskComment.create({
+                    data: {
+                        task_id: oldComment.task_id,
+                        user_id: String(userId),
+                        message_id: String(commentId),
+                        comment: text
+                    }
+                });
+                if(comment)
+                {
+                    const change = await this.prisma.taskChange.create({
+                        data: {
+                            user_id: String(userId),
+                            task_id: Number(oldComment.id),
+                            type: "status",
+                            old_value: "comment",
+                            new_value: text
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+
  
 }
