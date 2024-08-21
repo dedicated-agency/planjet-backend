@@ -458,7 +458,7 @@ Give these permissions to file from the service\n
                     data: {
                         user_id: String(userId),
                         task_id: Number(checkTask.id),
-                        type: "status",
+                        type: "comment",
                         old_value: "comment",
                         new_value: text
                     }
@@ -486,7 +486,7 @@ Give these permissions to file from the service\n
                         data: {
                             user_id: String(userId),
                             task_id: Number(oldComment.task_id),
-                            type: "status",
+                            type: "comment",
                             old_value: "comment",
                             new_value: text
                         }

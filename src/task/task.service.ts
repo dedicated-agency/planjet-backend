@@ -563,6 +563,10 @@ export class TaskService {
             const task = await this.prisma.task.findUnique({
                 where: {
                     id: Number(id)
+                },
+                include: {
+                    status: true,
+                    project: true,
                 }
             });
             if(!task) throw new NotFoundException("Task not found");
@@ -579,6 +583,17 @@ export class TaskService {
 
             if(comment)
             {
+                const change = await this.prisma.taskChange.create({
+                    data: {
+                        user_id: String(user_id),
+                        task_id: Number(id),
+                        type: "comment",
+                        old_value: "comment",
+                        new_value: text
+                    }
+                });
+    
+                if(change) this.notification.send(task.project.group_id, change.id, 'en')
                 return comment
             }
 

@@ -244,6 +244,9 @@ export class ProjectService {
         }else if(type === 'status')
         {
             data.status_permission = value
+        }else if(type === 'comment')
+        {
+            data.comment_permission = value
         }
 
         try {
