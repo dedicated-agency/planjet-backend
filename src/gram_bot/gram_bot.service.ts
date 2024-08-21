@@ -183,10 +183,10 @@ export class GramBotService implements OnModuleInit {
             {
                 const result1 = await this.client.invoke(
                     new Api.messages.SendReaction({
-                        peer: Number(task.project.group_id),
+                        peer: `-100${task.project.group_id}`,
                         msgId: Number(messageId),
                         //   @ts-ignore
-                        reaction: "U+1F601",
+                        reaction: [new Api.ReactionEmoji({emoticon:"👍"})]
                     })
                   );
                   console.log(result1);

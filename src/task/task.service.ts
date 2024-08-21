@@ -276,7 +276,6 @@ export class TaskService {
             if(!task) throw new NotFoundException("Task not found");
 
             let status: any = "";
-            console.log({status_ID, task});
             if(status_ID === -1)
             {
                 const checkStatus = await this.prisma.status.findFirst({
@@ -284,8 +283,9 @@ export class TaskService {
                         name: "Completed",
                         project_id: Number(task.project_id)
                     }
-                })
-                console.log({status_ID, task, checkStatus});
+                });
+                status_ID = checkStatus.id;
+                status = checkStatus;
             }else{
                 status = await this.prisma.status.findUnique({
                     where: {
@@ -295,6 +295,9 @@ export class TaskService {
             }
         
             if(!status) throw new NotFoundException("Status not available");
+
+            console.log({status, status_ID});
+
             const data: any = {
                 status_id: Number(status_ID)
             }
