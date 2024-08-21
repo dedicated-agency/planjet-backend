@@ -385,7 +385,7 @@ export class TaskService {
     async show(id: number)
     {
         try {
-            const task = await this.prisma.task.findUnique({
+            const task: any = await this.prisma.task.findUnique({
                 where: {
                     id: Number(id)
                 },
@@ -412,6 +412,16 @@ export class TaskService {
             });
 
             if(!task) throw new NotFoundException("Task not found");
+
+            task.users = await this.prisma.user.findMany({
+                where: {
+                    groupUsers: {
+                        some: {
+                            group_id: task.project.group_id
+                        }
+                    }
+                }
+            })
 
             return task;
         } catch (error) {
