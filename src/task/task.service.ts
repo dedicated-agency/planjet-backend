@@ -630,19 +630,22 @@ export class TaskService {
         try {
             if(participant.length > 0)
             {
-                const task_participant = task.taskUser.map(taskUser => taskUser.user_id);
+                await this.prisma.taskUser.deleteMany({
+                    where: {
+                        task_id: Number(id),
+                    }
+                });
 
-                participant.map(async (participant_element) => {
-                    const check = await this.prisma.taskUser.findFirst({
-                        where: {
-                            user_id: String(participant_element),
-                            task_id: Number(id)
-                        }
-                    });
-
-                    
+                await this.prisma.taskUser.createMany({
+                    data: participant.map((participant_item) => ({
+                        task_id: Number(id),
+                        user_id: String(participant_item)
+                    }))
                 })
+     
             }
+
+            return "success"
         } catch (error) {
             console.log("Update participant error: " + error);
         }
