@@ -88,6 +88,8 @@ model Task {
   is_completed Boolean @default(false)
   is_archive Boolean @default(false)
   priority Int @default(2) //1,2,3
+  point Int?
+  point_type String?
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
 
@@ -126,6 +128,7 @@ model TaskComment {
   id Int @id @default(autoincrement())
   task_id Int
   user_id String
+  message_id String?
   comment String @db.Text
   created_at DateTime @default(now())
 

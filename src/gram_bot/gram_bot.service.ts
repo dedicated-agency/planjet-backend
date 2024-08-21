@@ -12,6 +12,8 @@ import * as path from 'path';
 import { CustomFile } from 'telegram/client/uploads';
 import { NotificationService } from 'src/notification/notification.service';
 import { PrismaService } from 'src/prisma.service';
+import { EditedMessage } from 'telegram/events/EditedMessage';
+import { EventBuilder } from 'telegram/events/common';
 
 interface InitTask {
     topic: { title: string; id: number };
@@ -64,7 +66,7 @@ export class GramBotService implements OnModuleInit {
     
             this.client.addEventHandler(this.handleNewMessage.bind(this), new NewMessage({}));
             // this.client.addEventHandler(this.handleNewReaction.bind(this), new EditedMessage({}));
-            // this.client.addEventHandler(this.checkListener.bind(this), new EventBuilder({}));
+            this.client.addEventHandler(this.checkListener.bind(this), new EventBuilder({}));
             this.client.addEventHandler(async (update) => this.handleAddBotToGroup(update));
 
             this.logger.log('Bot is up and running!');
@@ -97,16 +99,20 @@ export class GramBotService implements OnModuleInit {
 
     private async checkListener(event)
     {
-        // if(event)
-        // {
-        //     console.log({
-        //         event: event,
-        //         peer: event.peer,
-        //         message: event.message,
-        //         newReactions: event.newReactions
-        //     });
-        // }
-        // this.getChannelTopics("s")
+        if(event)
+        {
+            if(event.className === "UpdateBotMessageReaction" && event.newReactions.length &&  event.newReactions[0].emoticon === '👍'){
+                this.doneTask(event.msgId, Number(event.actor.userId), -1, true)
+            }
+            // console.log({
+            //     event: event,
+            //     peer: event.peer,
+            //     message: event.message,
+            //     newReactions: event.newReactions
+            // });
+
+            
+        }
     }
 
     private async handleNewMessage(event: any) {
@@ -144,7 +150,7 @@ export class GramBotService implements OnModuleInit {
             {
                 if(message.replyTo && topic)
                 {
-                    await this.createTask(chatId, message.replyTo.replyToMsgId, message.fromId.userId, topic);
+                    await this.createTask(chatId, message.replyTo.replyToMsgId, message.fromId.userId, topic, messageId);
                 }else{
                     await this.sendMessage(chatId, "Task not found", messageId);
                 }
@@ -157,7 +163,7 @@ export class GramBotService implements OnModuleInit {
             {
                 if(message.replyTo && topic)
                 {
-                    await this.doneTask(chatId, message.replyTo.replyToMsgId, message.fromId.userId, topic);
+                    await this.doneTask(message.replyTo.replyToMsgId, message.fromId.userId, messageId);
                 }else{
                     await this.sendMessage(chatId, "Task not found", messageId);
                 }
@@ -165,7 +171,7 @@ export class GramBotService implements OnModuleInit {
         }
     }
 
-    private async doneTask(chatId: any, messageId: number, userId: number, topic: {title?: string, id: number, name?: string, topic_id?: number})
+    private async doneTask(messageId: number, userId: number, doneMessageId: number, byEmoji?: boolean)
     {
         try {
             const task = await this.prisma.task.findFirst({
@@ -178,18 +184,21 @@ export class GramBotService implements OnModuleInit {
             });
                 
             const result = await this.taskService.updateStatus(userId, -1, task.id);
-            console.log({result})
             if(result.message === "Status successfully changed")
             {
-                const result1 = await this.client.invoke(
+                const emojiSended = await this.client.invoke(
                     new Api.messages.SendReaction({
                         peer: `-100${task.project.group_id}`,
                         msgId: Number(messageId),
                         //   @ts-ignore
                         reaction: [new Api.ReactionEmoji({emoticon:"👍"})]
                     })
-                  );
-                  console.log(result1);
+                );
+                if(emojiSended && !byEmoji)
+                {
+                    const removeDone = await this.removeMessage(task.project.group_id, doneMessageId)
+                    console.log(removeDone); 
+                }
             }
     
         } catch (error) {
@@ -199,7 +208,7 @@ export class GramBotService implements OnModuleInit {
         }
     }
 
-    private async createTask(chatId: any, messageId: number, userId: number, topic: {title?: string, id: number, name?: string, topic_id?: number})
+    private async createTask(chatId: any, messageId: number, userId: number, topic: {title?: string, id: number, name?: string, topic_id?: number}, doneMessageId: number)
     {
         try {
             const message: any = await this.client.getMessages(chatId, {ids: messageId, limit: 1});
@@ -257,6 +266,7 @@ export class GramBotService implements OnModuleInit {
                 if(checkChange)
                 {
                     await this.notificationService.send(gotTask.project.group_id, checkChange.id, gotTask.user.language_code, "createTask", gotTask);
+                    await this.removeMessage(gotTask.project.group_id, doneMessageId)
                 }
             }
      
@@ -413,6 +423,20 @@ Give these permissions to file from the service\n
             });
         } catch (error) {
             console.log("Send permissions image error: "+error);
+        }
+    }
+
+    private async removeMessage(channel: string, messageId: number)
+    {
+        try {
+            return await this.client.invoke(
+                new Api.channels.DeleteMessages({
+                  channel: channel,
+                  id: [messageId],
+                })
+            );
+        } catch (error) {
+            console.log("remove message: " + error.message);
         }
     }
  
