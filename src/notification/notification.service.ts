@@ -43,15 +43,19 @@ export class NotificationService {
                 const makedMsg = this.createTask(lang, task)
                 data.text = makedMsg.text;
                 data.reply_markup = makedMsg.inlineKeyboard
-            }else if(project.status_permission && change.type !== "created"){
-                if (!change) {
-                    console.log('change not found in messageShaper')
-                    return 
+            }else if(change){
+                if(project.status_permission && change.type === "status"){
+                    const makedMsg = this.messageShaper(lang, change)
+                    data.text = makedMsg.text;
+                    data.reply_markup = makedMsg.inlineKeyboard
+                }else if(project.comment_permission && change.type === "comment")
+                {
+                    const makedMsg = this.messageShaper(lang, change)
+                    data.text = makedMsg.text;
+                    data.reply_markup = makedMsg.inlineKeyboard
                 }
-                const makedMsg = this.messageShaper(lang, change)
-                data.text = makedMsg.text;
-                data.reply_markup = makedMsg.inlineKeyboard
-            }
+            } 
+
             if(data.text)
             {
                 await axios.post(this.url, data);
@@ -102,6 +106,27 @@ ${languages[lang].author}: <b>${task.user.name}</b>
 }
         } catch (error) {
             console.log("Error createTask: " + error);
+        }
+    }
+
+    createComment(lang: string = 'en', change: any)
+    {
+        try {
+            return {
+                text: `#comment by ${change.user.name}
+
+<b>${change.task.name}</b>
+
+${languages[lang].project}: <b>${change.task.project.name} 💻</b>
+
+${languages[lang].author}: <b>${change.task.user.name}</b>
+   
+${languages[lang][change.type]}: <b>${change.new_value}</b> 
+`,
+                inlineKeyboard: this.inlineKeyboard(`https://t.me/dedicated_task_manager_bot/Task_Manager?startapp=tasks_${change.task_id}`)
+            }
+        } catch (error) {
+            console.log("Error messageShaper: " + error);
         }
     }
 
