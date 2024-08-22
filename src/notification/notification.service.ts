@@ -154,7 +154,7 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
             const project = await this.prisma.project.findFirst({
                 where: {
                     group_id: String(chat_id),
-                    topic_id: topic.id
+                    topic_id: String(topic.id)
                 }
             });
             data.reply_markup = String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=projects_${project.id}`
