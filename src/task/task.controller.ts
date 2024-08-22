@@ -16,7 +16,8 @@ export class TaskController {
       description: string,
       deadline: string,
       participant: number[],
-      priority: number
+      priority: number,
+      point: number
     },
     @Res() response: Response,
     @Req() req,

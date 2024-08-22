@@ -17,7 +17,8 @@ export class TaskService {
             description: string,
             deadline: string,
             participant: number[],
-            priority: number
+            priority: number,
+            point: number
         }, user_id: string
     )
     {
@@ -27,7 +28,8 @@ export class TaskService {
             description,
             deadline,
             participant,
-            priority
+            priority,
+            point
         } = data;
 
         const project = await this.prisma.project.findUnique({
@@ -90,7 +92,8 @@ export class TaskService {
                     participants: `${user_id}`,
                     description,
                     // deadline: new Date(deadline),
-                    priority
+                    priority,
+                    point: Number(point),
                 },
                 include: {
                     status: true,
