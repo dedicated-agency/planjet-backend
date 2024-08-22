@@ -89,7 +89,7 @@ export class TaskService {
                     name,
                     participants: `${user_id}`,
                     description,
-                    deadline: new Date(deadline),
+                    // deadline: new Date(deadline),
                     priority
                 },
                 include: {
