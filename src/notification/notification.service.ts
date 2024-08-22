@@ -36,8 +36,15 @@ export class NotificationService {
                 parse_mode: 'html',
             };
 
-            if(task && task.project?.topic_id !== '1') { data.message_thread_id = task.project.topic_id }
-            
+            if(task && task.project?.topic_id !== '1') 
+            { 
+                data.message_thread_id = task.project.topic_id 
+            }
+            else if(change && change.task.project.topic_id !== '1')
+            {
+                data.message_thread_id = change.task.project.topic_id
+            }
+
             if(task && type === "createTask" && project.add_permission)
             {
                 const makedMsg = this.createTask(lang, task)
@@ -50,7 +57,7 @@ export class NotificationService {
                     data.reply_markup = makedMsg.inlineKeyboard
                 }else if(project.comment_permission && change.type === "comment")
                 {
-                    const makedMsg = this.messageShaper(lang, change)
+                    const makedMsg = this.createComment(lang, change)
                     data.text = makedMsg.text;
                     data.reply_markup = makedMsg.inlineKeyboard
                 }
@@ -60,6 +67,8 @@ export class NotificationService {
             {
                 await axios.post(this.url, data);
             }
+            console.log(data);
+            
             return "success"
         } catch (error) {
             console.log('send error' +  error);
