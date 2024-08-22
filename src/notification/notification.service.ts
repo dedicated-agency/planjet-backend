@@ -90,7 +90,7 @@ ${languages[lang].author}: <b>${change.task.user.name}</b>
    
 ${languages[lang][change.type]}: <b>${change.old_value} ➡️  ${change.new_value}</b> 
 `,
-    inlineKeyboard: this.inlineKeyboard(`https://t.me/dedicated_task_manager_bot/Task_Manager?startapp=tasks_${change.task_id}`)
+    inlineKeyboard: this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=tasks_${change.task_id}`)
 }
         } catch (error) {
             console.log("Error messageShaper: " + error);
@@ -111,7 +111,7 @@ ${languages[lang].author}: <b>${task.user.name}</b>
    
 <b>${languages[lang].task_created}</b> 
 `,
-    inlineKeyboard: this.inlineKeyboard(`https://t.me/dedicated_task_manager_bot/Task_Manager?startapp=tasks_${task.id}`)
+    inlineKeyboard: this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=tasks_${task.id}`)
 }
         } catch (error) {
             console.log("Error createTask: " + error);
@@ -132,7 +132,7 @@ ${languages[lang].author}: <b>${change.task.user.name}</b>
    
 ${languages[lang].comment}: <b>${change.new_value}</b> 
 `,
-                inlineKeyboard: this.inlineKeyboard(`https://t.me/dedicated_task_manager_bot/Task_Manager?startapp=tasks_${change.task_id}`)
+                inlineKeyboard: this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=tasks_${change.task_id}`)
             }
         } catch (error) {
             console.log("Error messageShaper: " + error);
@@ -141,25 +141,24 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
 
     async addBotToChannel(chat_id: number, lang: string = 'en', topic?: any)
     {
-        const inlineKeyboard = {
-            inline_keyboard: [
-              [
-                {
-                  text: languages[lang].open_app,
-                    url: String(process.env.TELEGRAM_WEB_APP_URL)
-                }
-              ]
-            ]
-        };
 
         const data: any = {
             chat_id: `-100${Number(chat_id)}`,
             text: '',
             parse_mode: 'html',
-            reply_markup: inlineKeyboard
+            reply_markup: this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL))
         };
         
-        if(topic && topic.id) { data.message_thread_id = topic.id }
+        if(topic && topic.id) { 
+            data.message_thread_id = topic.id 
+            const project = await this.prisma.project.findFirst({
+                where: {
+                    group_id: String(chat_id),
+                    topic_id: topic.id
+                }
+            });
+            data.reply_markup = String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=projects_${project.id}`
+        }
 
         try {
              const text = `${topic ? languages[lang].manager_commands : languages[lang].add_bot_to_group}
@@ -171,7 +170,6 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
 /tasks ${languages[lang].tasks}
 
 /done ${languages[lang].task_done}`;
-
             
             data.text = text
             await axios.post(this.url, data);
