@@ -270,15 +270,16 @@ export class GramBotService implements OnModuleInit {
                 if(checkChange)
                 {
                     await this.notificationService.send(gotTask.project.group_id, checkChange.id, gotTask.user.language_code, "createTask", gotTask);
-                    const emojiSended = await this.client.invoke(
+                    await this.removeMessage(gotTask.project.group_id, doneMessageId)
+                    
+                    await this.client.invoke(
                         new Api.messages.SendReaction({
                             peer: `-100${gotTask.project.group_id}`,
                             msgId: Number(messageId),
                             //   @ts-ignore
-                            reaction: [new Api.ReactionEmoji({emoticon:"✍🏻"})]
+                            reaction: [new Api.ReactionEmoji({emoticon:"🤝"})]
                         })
                     );
-                    await this.removeMessage(gotTask.project.group_id, doneMessageId)
                 }
             }
      
