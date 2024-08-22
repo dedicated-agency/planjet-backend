@@ -130,7 +130,7 @@ ${languages[lang].project}: <b>${change.task.project.name} 💻</b>
 
 ${languages[lang].author}: <b>${change.task.user.name}</b>
    
-${languages[lang][change.type]}: <b>${change.new_value}</b> 
+${languages[lang].comment}: <b>${change.new_value}</b> 
 `,
                 inlineKeyboard: this.inlineKeyboard(`https://t.me/dedicated_task_manager_bot/Task_Manager?startapp=tasks_${change.task_id}`)
             }
