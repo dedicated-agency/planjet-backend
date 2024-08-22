@@ -157,7 +157,7 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
                     topic_id: String(topic.id)
                 }
             });
-            data.reply_markup = String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=projects_${project.id}`
+            data.reply_markup = this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=projects_${project.id}`)
         }
 
         try {
