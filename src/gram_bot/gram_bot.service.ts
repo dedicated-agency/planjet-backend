@@ -137,6 +137,7 @@ export class GramBotService implements OnModuleInit {
                 }else{
                     await this.sendMessage(chatId, "Task not found", messageId);
                 }
+                break;
             case "/done":
                 if (message.replyTo && topic) {
                     await this.doneTask(message.replyTo.replyToMsgId, message.fromId.userId, messageId);
