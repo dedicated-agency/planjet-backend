@@ -633,19 +633,63 @@ export class TaskService {
         try {
             if(participant.length > 0)
             {
-                await this.prisma.taskUser.deleteMany({
+                let old_value = "";
+                let new_value = "";
+                const oldUsers = await this.prisma.taskUser.findMany({
                     where: {
                         task_id: Number(id),
+                    },
+                    include: {
+                        user: true
                     }
                 });
-
-                await this.prisma.taskUser.createMany({
+                
+                if(oldUsers.length){
+                    oldUsers.map(oldUser => {
+                        old_value += oldUser.user.name + ", "
+                    });
+                    await this.prisma.taskUser.deleteMany({
+                        where: {
+                            task_id: Number(id),
+                        }
+                    });
+                }
+          
+                const checkCreate = await this.prisma.taskUser.createMany({
                     data: participant.map((participant_item) => ({
                         task_id: Number(id),
                         user_id: String(participant_item)
                     }))
-                })
-     
+                });
+
+                if(checkCreate)
+                {
+                    const newUsers = await this.prisma.taskUser.findMany({
+                        where: {
+                            task_id: Number(id),
+                        },
+                        include: {
+                            user: true
+                        }
+                    });
+                    if(newUsers.length)
+                    {
+                        newUsers.map(newUser => {
+                            new_value += newUser.user.name + ", "
+                        });
+                    }
+
+                    await this.prisma.taskChange.create({
+                        data: {
+                            task_id: Number(id),
+                            user_id: String(telegram_id),
+                            old_value,
+                            new_value,
+                            type: "participant"
+                        }
+                    });
+                }
+                
             }
 
             return "success"
