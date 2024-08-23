@@ -287,10 +287,10 @@ export class TaskService {
             });
             if(!task) throw new NotFoundException("Task not found");
 
-            let status;
+            let status: any;
             if(statusID === -1)
             {
-                const status = await this.prisma.status.findFirst({
+                status = await this.prisma.status.findFirst({
                     where: {
                         name: "Completed",
                         project_id: Number(task.project_id)
@@ -329,7 +329,7 @@ export class TaskService {
                 }
             });
 
-            if(change) this.notification.send(task.project.group_id, change.id, 'en')
+            if(change) await this.notification.send(task.project.group_id, change.id, 'en')
 
             return {
                 message: "Status successfully changed"
