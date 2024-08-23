@@ -101,61 +101,54 @@ export class GramBotService implements OnModuleInit {
 
     private async handleNewMessage(event: any) {
         const message = event.message;
-
-        if(message)
+        if (!message) return;
+        const chatId = message?.peerId;
+        const messageId = message.id;
+        const messageText: string = message.message;
+        let topic: any;
+        console.log(`Received message: ${messageText}`);
+        try {
+            if (messageText !== "/start") {
+                const [channel, fetchedTopic] = await Promise.all([
+                    this.getChannel(message.peerId.channelId),
+                    this.getChannelTopics(message.peerId.channelId, messageId)
+                ]);
+                topic = fetchedTopic;
+            }
+        } catch (error) {
+            console.log(`event message error :`  + error);
+            return;
+        }
+        switch (messageText)
         {
-            const chatId = message?.peerId;
-            const messageId = message.id;
-            const messageText: string = message.message;
-            let topic: any;
-
-            console.log(`Received message: ${messageText}`);
-
-            try {
-                if(messageText !== "/start")
-                {
-                    await this.getChannel(message.peerId.channelId)
-                    topic = await this.getChannelTopics(message.peerId.channelId, messageId)
-                }
-            } catch (error) {
-                console.log(`event message error: ${error}`);
-            }
-            if(messageText === "/start")
-            {
-                await this.getFullUser(message.peerId.userId)
-                await this.sendMessage(chatId, `Topshiriqlar boshqaruvchi botiga xush kelibsiz\nAssignments welcome to the managing bot\nЗадания добро пожаловать в управляющий бот`);
-                await this.sendPermissionImage(message.peerId.userId)
-            }
-            else if(messageText === "/manager")
-            {
-                await this.notificationService.addBotToChannel(chatId.channelId, 'en', topic)
-            }
-            else if(messageText === "/add")
-            {
+            case "/start": 
+                await Promise.all([
+                    this.sendMessage(chatId, `Topshiriqlar boshqaruvchi botiga xush kelibsiz\nAssignments welcome to the managing bot\nЗадания добро пожаловать в управляющий бот`),
+                    this.sendPermissionImage(message.peerId.userId)
+                ]);
+                break;
+            case "/manager": 
+                await this.notificationService.addBotToChannel(chatId.channelId, 'en', topic);
+                break;
+            case "/add":
                 if(message.replyTo && topic)
                 {
                     await this.createTask(chatId, message.replyTo.replyToMsgId, message.fromId.userId, topic, messageId);
                 }else{
                     await this.sendMessage(chatId, "Task not found", messageId);
                 }
-            }
-            else if(messageText === "/tasks")
-            {
-                
-            }
-            else if(messageText === "/done")
-            {
-                if(message.replyTo && topic)
-                {
+            case "/done":
+                if (message.replyTo && topic) {
                     await this.doneTask(message.replyTo.replyToMsgId, message.fromId.userId, messageId);
-                }else{
+                } else {
                     await this.sendMessage(chatId, "Task not found", messageId);
                 }
-            }
-            else if(message.replyTo)
-            {
-                await this.commentCreate(message.replyTo.replyToMsgId, message.fromId.userId, messageId, messageText)
-            }
+                break;
+            default:
+                if (message.replyTo) {
+                    await this.commentCreate(message.replyTo.replyToMsgId, message.fromId.userId, messageId, messageText)
+                }
+                break;
         }
     }
 
@@ -172,7 +165,7 @@ export class GramBotService implements OnModuleInit {
             });
                 
             const result = await this.taskService.updateStatus(userId, -1, task.id);
-            if(result.message === "Status successfully changed")
+            if(result?.message === "Status successfully changed")
             {
                 const emojiSended = await this.client.invoke(
                     new Api.messages.SendReaction({
@@ -184,15 +177,13 @@ export class GramBotService implements OnModuleInit {
                 );
                 if(emojiSended && !byEmoji)
                 {
-                    const removeDone = await this.removeMessage(task.project.group_id, doneMessageId)
-                    console.log(removeDone); 
+                    await this.removeMessage(task.project.group_id, doneMessageId)
                 }
             }
     
         } catch (error) {
             console.log("Create task error " + error);
-            console.log(error);
-            
+            throw error; 
         }
     }
 
@@ -210,7 +201,6 @@ export class GramBotService implements OnModuleInit {
             const usernameRegex = /@\w+/g;
             const usernames =  message[0].message.match(usernameRegex);
             const messageText =  message[0].message.replace(usernameRegex, '').trim();
-    
             const task = await this.taskService.init({
                 topic_id: topic.topic_id ? topic.topic_id : Number(topic.id),
                 topic_title: topic.title ? topic.title : topic.name,
@@ -219,54 +209,34 @@ export class GramBotService implements OnModuleInit {
                 user_id: Number(userId),
                 group_id: Number(chatId.channelId)
             });
-
-            if(task && usernames && usernames.length)
-            {
-                await this.taskService.participants(usernames, task.id);
-            }
-
-            const gotTask = await this.prisma.task.findUnique({
-                where: {
-                    id: task.id
-                },
-                include: {
-                    project: {
-                        include: {
-                            group: true
-                        }
-                    },
-                    status: true,
-                    user: true,
+            const checkChange = await this.prisma.taskChange.create({
+                data: {
+                    user_id: String(userId),
+                    task_id: Number(task.id),
+                    type: "created",
+                    old_value: "created",
+                    new_value: "created"
                 }
-            })
- 
-            if(gotTask)
+            });
+            if(checkChange)
             {
-                const checkChange = await this.prisma.taskChange.create({
-                    data: {
-                        user_id: String(userId),
-                        task_id: Number(gotTask.id),
-                        type: "created",
-                        old_value: "created",
-                        new_value: "created"
-                    }
-                });
-                if(checkChange)
-                {
-                    await this.notificationService.send(gotTask.project.group_id, checkChange.id, gotTask.user.language_code, "createTask", gotTask);
-                    await this.removeMessage(gotTask.project.group_id, doneMessageId)
-                    
-                    await this.client.invoke(
+                await Promise.all([
+                    this.notificationService.send(task.project.group_id, checkChange.id, task.user.language_code, "createTask", task), 
+                    this.removeMessage(task.project.group_id, doneMessageId), 
+                    this.client.invoke(
                         new Api.messages.SendReaction({
-                            peer: `-100${gotTask.project.group_id}`,
+                            peer: `-100${task.project.group_id}`,
                             msgId: Number(messageId),
                             //   @ts-ignore
                             reaction: [new Api.ReactionEmoji({emoticon:"🤝"})]
                         })
-                    );
-                }
+                    )
+                ]);
             }
-     
+            if(usernames?.length)
+            {
+                await this.taskService.participants(usernames, task.id);
+            }
         } catch (error) {
             console.log("Create task error " + error);
         }
@@ -296,19 +266,15 @@ export class GramBotService implements OnModuleInit {
                 })
             ); 
               
-            if(result && result.chats.length)
+            if(result?.chats.length)
             {
                 const checkGroup = result.chats[0];
-                const chat_id = checkGroup.id;
-                const accessHash = checkGroup.accessHash;
-                const name: string = checkGroup.title
-
-                await this.groupService.init({id: chat_id, name});
-                await this.groupUser(id, accessHash);
+                await this.groupService.init({id: checkGroup.id, name: checkGroup.title});
+                await this.groupUser(id, checkGroup.accessHash);
             }
             
         } catch (error) {
-            console.log("Get full channel error ", error);
+            console.log("Get getChannel error ", error);
         }
     }
 
@@ -320,42 +286,63 @@ export class GramBotService implements OnModuleInit {
                     channel: channel_id,
                     filter: new Api.ChannelParticipantsRecent(),
                     offset: 0,
-                    limit: 100,
+                    limit: 50,
                     hash: accessHash,
                 })
             );
 
-            if(result && result.count > 0)
+            if(result?.count > 0)
             {
-                const users = result.users;
+                const nonBotUsers = [];
 
-                users.map(async (user: {
-                    id: number,
-                    bot: boolean,
-                    langCode: string,
-                    firstName: string,
-                    username: string | null,
-                    photo: {id: number} | null
-                }) => {
-                    if(!user.bot)
-                    {
+                for (const user of result.users) {
+                    if (!user.bot) {
                         const checkUser = await this.userService.init({
                             id: user.id,
                             first_name: user.firstName,
                             language_code: user.langCode,
                             username: user.username,
                         });
-
-                        if(checkUser)
-                        {
-                            await this.groupService.checkUsers([user.id], channel_id)
+    
+                        if (checkUser) {
+                            nonBotUsers.push(user.id);
                         }
                     }
-                });
+                }
+    
+                if (nonBotUsers.length > 0) {
+                    await this.groupService.checkUsers(nonBotUsers, channel_id);
+                }
+
+
+                // const users = result.users;
+                // users.map(async (user: {
+                //     id: number,
+                //     bot: boolean,
+                //     langCode: string,
+                //     firstName: string,
+                //     username: string | null,
+                //     photo: {id: number} | null
+                // }) => {
+                //     if(!user.bot)
+                //     {
+                //         const checkUser = await this.userService.init({
+                //             id: user.id,
+                //             first_name: user.firstName,
+                //             language_code: user.langCode,
+                //             username: user.username,
+                //         });
+                //         if(checkUser)
+                //         {
+                //             await this.groupService.checkUsers([user.id], channel_id)
+                //         }
+                //     }
+                // });
             }
 
         } catch (error) {
             console.log("Get groupUser error ", error);
+            throw error; 
         }
     }
 
@@ -370,31 +357,17 @@ export class GramBotService implements OnModuleInit {
                 })
             );
 
-            if(result && result.topics && result.topics.length)
+            if(result?.topics?.length)
             {
-                const topics = result.topics;
-                topics.map(async (topic: {
-                    id: number,
-                    title: string,
-                }) => (
-                    await this.projectService.init({groupId: channelId, id: topic.id, name: topic.title})
-                ));
-                return topics.length > 0 ? topics[0] : false
+                const topic = result.topics[0];
+                await this.projectService.init({groupId: channelId, id: topic.id, name: topic.title});
+                return topic;
             }else{
                 return await this.projectService.init({groupId: channelId, id: 1, name: "General"})
             }
         } catch (error) {
             console.log("Get topics error " + error);
         }
-    }
-
-    private async getFullUser(userId: number)
-    {
-        const result = await this.client.invoke(
-            new Api.users.GetFullUser({
-              id: Number(userId),
-            })
-        );
     }
 
     private async sendPermissionImage(userId: number)
@@ -473,66 +446,5 @@ Give these permissions to file from the service\n
                 });
             }
         }
-
-
-
-        // const checkTask = await this.prisma.task.findFirst({
-        //     where: {
-        //         message_id: Number(messageId)
-        //     }
-        // });
-
-        // if(checkTask)
-        // {
-        //     const comment = await this.prisma.taskComment.create({
-        //         data: {
-        //             task_id: checkTask.id,
-        //             user_id: String(userId),
-        //             message_id: String(commentId),
-        //             comment: text
-        //         }
-        //     });
-        //     if(comment)
-        //     {
-        //         await this.prisma.taskChange.create({
-        //             data: {
-        //                 user_id: String(userId),
-        //                 task_id: Number(checkTask.id),
-        //                 type: "comment",
-        //                 old_value: "comment",
-        //                 new_value: text
-        //             }
-        //         });
-        //     }
-        // }else{
-        //     const oldComment = await this.prisma.taskComment.findFirst({
-        //         where: {
-        //             message_id: String(messageId)
-        //         }
-        //     });
-        //     if(oldComment)
-        //     {
-        //         const comment = await this.prisma.taskComment.create({
-        //             data: {
-        //                 task_id: oldComment.task_id,
-        //                 user_id: String(userId),
-        //                 message_id: String(commentId),
-        //                 comment: text
-        //             }
-        //         });
-        //         if(comment)
-        //         {
-        //             await this.prisma.taskChange.create({
-        //                 data: {
-        //                     user_id: String(userId),
-        //                     task_id: Number(oldComment.task_id),
-        //                     type: "comment",
-        //                     old_value: "comment",
-        //                     new_value: text
-        //                 }
-        //             });
-        //         }
-        //     }
-        // }
     }
 }

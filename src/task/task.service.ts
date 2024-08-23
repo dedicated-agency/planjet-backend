@@ -167,7 +167,6 @@ export class TaskService {
                         group: true
                     }
                 }
-               
             }
         });
 
@@ -218,7 +217,16 @@ export class TaskService {
             }
 
             return await this.prisma.task.create({
-                data: data
+                data: data,
+                include: {
+                    project: {
+                        include: {
+                            group: true
+                        }
+                    },
+                    status: true,
+                    user: true,
+                }
             });  
         }
 
@@ -265,11 +273,12 @@ export class TaskService {
 
     async updateStatus(user_id: number, status_id: number, id: number)
     {
-        let status_ID = status_id;
+        const taskId = Number(id);
+        let statusID = Number(status_id);
         try {
             const task = await this.prisma.task.findUnique({
                 where: {
-                    id: Number(id)
+                    id: taskId
                 },
                 include: {
                     status: true,
@@ -278,48 +287,42 @@ export class TaskService {
             });
             if(!task) throw new NotFoundException("Task not found");
 
-            let status: any = "";
-            if(status_ID === -1)
+            let status;
+            if(statusID === -1)
             {
-                const checkStatus = await this.prisma.status.findFirst({
+                const status = await this.prisma.status.findFirst({
                     where: {
                         name: "Completed",
                         project_id: Number(task.project_id)
                     }
                 });
-                status_ID = checkStatus.id;
-                status = checkStatus;
+                if (status) statusID = status.id;
             }else{
                 status = await this.prisma.status.findUnique({
-                    where: {
-                        id: Number(status_ID)
-                    }
+                    where: { id: statusID },
                 });
             }
         
             if(!status) throw new NotFoundException("Status not available");
 
-            console.log({status, status_ID});
-
             const data: any = {
-                status_id: Number(status_ID)
+                status_id: statusID,
+                is_completed: ["Завершено", "Tugallangan", "Completed"].includes(status.name) || false,
             }
-            if(status.name === "Завершено" || status.name === "Tugallangan" || status.name === "Completed"){
-                data.is_completed = true;
-            }else if(task.is_completed){
+
+            if (task.is_completed && !data.is_completed) {
                 data.is_completed = false;
             }
+   
             await this.prisma.task.update({
-                where: {
-                    id: Number(id)
-                },
+                where: { id: taskId },
                 data
             });
 
             const change = await this.prisma.taskChange.create({
                 data: {
                     user_id: String(user_id),
-                    task_id: Number(id),
+                    task_id: taskId,
                     type: "status",
                     old_value: task.status.name,
                     new_value: status.name
@@ -334,7 +337,7 @@ export class TaskService {
 
         } catch (error) {
             console.log("Update status task: " + error);
-            console.log(error);
+            throw error; 
         }
     }
 
