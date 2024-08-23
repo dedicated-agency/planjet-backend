@@ -150,16 +150,13 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
         };
         
         if(topic && topic.id) { 
-            console.log({topic});
-            
-            data.message_thread_id = topic.id 
             let project = await this.prisma.project.findFirst({
                 where: {
                     group_id: String(chat_id),
                     topic_id: String(topic.id)
                 }
             });
-
+            
             if(!project)
             {
                 project = await this.prisma.project.findFirst({
@@ -170,7 +167,8 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
                 });
             }
             if(project)
-            {
+                {
+                data.message_thread_id = topic.id 
                 data.reply_markup = this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=projects_${project.id}`)
             }
         }
