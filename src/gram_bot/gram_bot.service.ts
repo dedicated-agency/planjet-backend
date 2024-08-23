@@ -67,7 +67,6 @@ export class GramBotService implements OnModuleInit {
             this.client.addEventHandler(this.handleNewMessage.bind(this), new NewMessage({}));
             // this.client.addEventHandler(this.handleNewReaction.bind(this), new EditedMessage({}));
             this.client.addEventHandler(this.handleDoneReaction.bind(this), new EventBuilder({}));
-            this.client.addEventHandler(async (update) => this.handleAddBotToGroup(update));
 
             this.logger.log('Bot is up and running!');
             return; 
@@ -85,16 +84,6 @@ export class GramBotService implements OnModuleInit {
             }
           }
         }
-      }
-
-    private async handleAddBotToGroup(update)
-    {
-        if (update && update.className === 'UpdateChannelParticipant') 
-        {
-            console.log('Bot was added to a group or channel!');
-    
-            await this.notificationService.addBotToChannel(Number(update.channelId));
-        }
     }
 
     private async handleDoneReaction(event)
@@ -103,15 +92,10 @@ export class GramBotService implements OnModuleInit {
         {
             if(event.className === "UpdateBotMessageReaction" && event.newReactions.length &&  event.newReactions[0].emoticon === '👍'){
                 this.doneTask(event.msgId, Number(event.actor.userId), -1, true)
+            }else if(event.className === "UpdateChannelParticipant")
+            {
+                await this.notificationService.addBotToChannel(Number(event.channelId));
             }
-            // console.log({
-            //     event: event,
-            //     peer: event.peer,
-            //     message: event.message,
-            //     newReactions: event.newReactions
-            // });
-
-            
         }
     }
 
@@ -445,66 +429,110 @@ Give these permissions to file from the service\n
 
     private async commentCreate(messageId: number, userId: number, commentId: number, text: string)
     {
-        const checkTask = await this.prisma.task.findFirst({
+        const user_id_str = String(userId);
+        const message_id_str = String(messageId);
+        const comment_id_str = String(commentId);
+
+        const taskOrComment = await this.prisma.task.findFirst({
             where: {
-                message_id: Number(messageId)
+                OR: [
+                    { message_id: Number(messageId) },
+                    { taskComment: { some: { message_id: message_id_str } } }
+                ]
+            },
+            include: {
+                taskComment: {
+                    where: {
+                        message_id: message_id_str
+                    }
+                }
             }
         });
 
-        if(checkTask)
-        {
+        const taskId = taskOrComment?.id || taskOrComment?.taskComment[0]?.task_id;
+
+        if (taskId) {
             const comment = await this.prisma.taskComment.create({
                 data: {
-                    task_id: checkTask.id,
-                    user_id: String(userId),
-                    message_id: String(commentId),
+                    task_id: taskId,
+                    user_id: user_id_str,
+                    message_id: comment_id_str,
                     comment: text
                 }
             });
-            if(comment)
-            {
-                const change = await this.prisma.taskChange.create({
+    
+            if (comment) {
+                await this.prisma.taskChange.create({
                     data: {
-                        user_id: String(userId),
-                        task_id: Number(checkTask.id),
+                        user_id: user_id_str,
+                        task_id: taskId,
                         type: "comment",
                         old_value: "comment",
                         new_value: text
                     }
                 });
             }
-        }else{
-            const oldComment = await this.prisma.taskComment.findFirst({
-                where: {
-                    message_id: String(messageId)
-                }
-            });
-            if(oldComment)
-            {
-                const comment = await this.prisma.taskComment.create({
-                    data: {
-                        task_id: oldComment.task_id,
-                        user_id: String(userId),
-                        message_id: String(commentId),
-                        comment: text
-                    }
-                });
-                if(comment)
-                {
-                    const change = await this.prisma.taskChange.create({
-                        data: {
-                            user_id: String(userId),
-                            task_id: Number(oldComment.task_id),
-                            type: "comment",
-                            old_value: "comment",
-                            new_value: text
-                        }
-                    });
-                }
-            }
         }
+
+
+
+        // const checkTask = await this.prisma.task.findFirst({
+        //     where: {
+        //         message_id: Number(messageId)
+        //     }
+        // });
+
+        // if(checkTask)
+        // {
+        //     const comment = await this.prisma.taskComment.create({
+        //         data: {
+        //             task_id: checkTask.id,
+        //             user_id: String(userId),
+        //             message_id: String(commentId),
+        //             comment: text
+        //         }
+        //     });
+        //     if(comment)
+        //     {
+        //         await this.prisma.taskChange.create({
+        //             data: {
+        //                 user_id: String(userId),
+        //                 task_id: Number(checkTask.id),
+        //                 type: "comment",
+        //                 old_value: "comment",
+        //                 new_value: text
+        //             }
+        //         });
+        //     }
+        // }else{
+        //     const oldComment = await this.prisma.taskComment.findFirst({
+        //         where: {
+        //             message_id: String(messageId)
+        //         }
+        //     });
+        //     if(oldComment)
+        //     {
+        //         const comment = await this.prisma.taskComment.create({
+        //             data: {
+        //                 task_id: oldComment.task_id,
+        //                 user_id: String(userId),
+        //                 message_id: String(commentId),
+        //                 comment: text
+        //             }
+        //         });
+        //         if(comment)
+        //         {
+        //             await this.prisma.taskChange.create({
+        //                 data: {
+        //                     user_id: String(userId),
+        //                     task_id: Number(oldComment.task_id),
+        //                     type: "comment",
+        //                     old_value: "comment",
+        //                     new_value: text
+        //                 }
+        //             });
+        //         }
+        //     }
+        // }
     }
-
-
- 
 }
