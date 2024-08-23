@@ -165,10 +165,11 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
                         topic_id: '1'
                     }
                 });
+            }else{
+                data.message_thread_id = topic.id 
             }
             if(project)
                 {
-                data.message_thread_id = topic.id 
                 data.reply_markup = this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=projects_${project.id}`)
             }
         }
