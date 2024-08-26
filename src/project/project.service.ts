@@ -74,10 +74,10 @@ export class ProjectService {
         }
     }
 
-    async showById(props: {project_id: number, status?:number, user_id?: number})
+    async showById(props: {project_id: number, status?:number, user_ids?: string[]})
     {
         const  {project_id} = props;
-        let {status, user_id} = props;
+        let {status, user_ids} = props;
         if(!status)
         {
             const statusId = await this.prisma.status.findFirst({
@@ -100,17 +100,21 @@ export class ProjectService {
             is_archive: false
         }
 
-        if(user_id)
+        if(user_ids.length > 0)
         {
-            const user = await this.prisma.user.findUnique({
+            const user = await this.prisma.user.findMany({
                 where: {
-                    telegram_id: String(user_id)
+                    telegram_id: {
+                        in: user_ids
+                    }
                 }
             });
-            if(!user) throw new NotFoundException("User not found");
+            if(!user.length) throw new NotFoundException("User not found");
             queryCode.taskUser = {
                 some: {
-                    user_id: String(user_id)
+                    user_id: {
+                        in: user_ids
+                    }
                 }
             }
         }

@@ -12,9 +12,9 @@ export class ProjectController {
     @Param("project_id") project_id: number,
     @Res() response: Response,
     @Query("status") status: number,
-    @Query("user_id") user_id: number
+    @Query("user_ids") ids: string
   ){
-    return response.json(await this.projectService.showById({project_id, status, user_id}))
+    return response.json(await this.projectService.showById({project_id, status, user_ids: ids ? ids.split(',').map(String) : []}))
   }
 
   @Post('init')
