@@ -101,17 +101,50 @@ export class StatusService {
         }
     }
 
-    async getStatuses(id: number)
+    async getStatuses(id: number, user_ids?: string[])
     {
+        const queryCode: any = {
+            project_id: Number(id)
+        }
         try {
-            return await this.prisma.status.findMany({
+            const results: any = [];
+            const statuses = await this.prisma.status.findMany({
                 where: {
-                    project_id: Number(id)
+                    project_id: Number(id),
                 },
                 include: {
                     tasks: true
                 }
             });
+            const tasks = await this.prisma.task.findMany({
+                where: {
+                    project_id: Number(id),
+                    taskUser: {
+                        some: {
+                            user_id: {
+                                in: user_ids
+                            }
+                        }
+                    }
+                }
+            });
+
+            statuses.map(status => {
+                const element: any = {
+                    id: status.id,
+                    name: status.name,
+                    project_id: status.project_id,
+                    order: status.order,
+                    tasksCount: 0
+                }
+                tasks.forEach(task => {
+                    if (task.status_id === status.id) {
+                        element.tasksCount += 1;
+                    }
+                });
+                results.push(element)
+            })
+            return results;
         } catch (error) {
             console.log("Get Status error: " + error);
         }

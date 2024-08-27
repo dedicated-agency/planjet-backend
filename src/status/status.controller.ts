@@ -24,9 +24,10 @@ export class StatusController {
   @UseGuards(UserGuard)
   async getStatuses(
     @Param("id") id: number,
-    @Res() response: Response
+    @Res() response: Response,
+    @Query("user_ids") ids: string
   ){
-    return response.json(await this.statusService.getStatuses(id))
+    return response.json(await this.statusService.getStatuses(id, ids ? ids.split(',').map(String) : []))
   }
 
   @Delete(":id")
