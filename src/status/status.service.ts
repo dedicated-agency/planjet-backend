@@ -103,30 +103,30 @@ export class StatusService {
 
     async getStatuses(id: number, user_ids?: string[])
     {
-        const queryCode: any = {
-            project_id: Number(id)
-        }
         try {
             const results: any = [];
             const statuses = await this.prisma.status.findMany({
                 where: {
                     project_id: Number(id),
-                },
-                include: {
-                    tasks: true
                 }
             });
-            const tasks = await this.prisma.task.findMany({
-                where: {
-                    project_id: Number(id),
-                    taskUser: {
-                        some: {
-                            user_id: {
-                                in: user_ids
-                            }
+            const queryCode: any = {
+                project_id: Number(id),
+            }
+
+            if(user_ids.length)
+            {
+                queryCode.taskUser = {
+                    some: {
+                        user_id: {
+                            in: user_ids
                         }
                     }
                 }
+            }
+
+            const tasks = await this.prisma.task.findMany({
+                where: queryCode
             });
 
             statuses.map(status => {
