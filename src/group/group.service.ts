@@ -96,11 +96,66 @@ export class GroupService {
                     }
                 },
                 include: {
-                    projects: true
+                    projects: {
+                        include: {
+                            tasks: {
+                                include: {
+                                    status: true
+                                }
+                            }
+                        }
+                    },
+                    groupUsers: {
+                        include: {
+                            user: true
+                        }
+                    }
                 }
             });
+
+            if(!groups.length) return [];
+
+            const result: any = [];
             
-            return groups;
+            groups.map((group) => {
+                let allTasks = 0;
+                let completedTasks = 0;
+                const element: any = {
+                    id: group.id,
+                    name: group.name,
+                    projects: group.projects,
+                };
+
+                const users: any = [];
+                if(group.groupUsers.length){
+                    group.groupUsers.map((groupUser) => {
+                        users.push(groupUser.user);
+                    });
+                }
+                element.users = users;
+
+                if(group.projects.length)
+                {
+                    group.projects.map((project) => {
+                        if(project.tasks.length)
+                        {
+                            project.tasks.map((task) => {
+                                allTasks += 1;
+                                if(task.status.name === 'Completed')
+                                {
+                                    completedTasks += 1;
+                                }
+                            });
+                        }
+                    })
+                }
+
+                element.allTasks = allTasks;
+                element.completedTasks = completedTasks;
+                result.push(element);
+            });
+            
+            return result;
         } catch (error) {
             console.log("Error group main " + error);
         }
