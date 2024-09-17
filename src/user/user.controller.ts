@@ -42,4 +42,15 @@ export class UserController {
     const {user} = req;
     return response.json(await this.userService.tasks(user.telegram_id, 1));
   }
+
+  @Get("events")
+  @UseGuards(UserGuard)
+  async events(
+    @Req() req,
+    @Res() response: Response
+  )
+  {
+    const {user} = req;
+    return response.json(await this.userService.events(user.telegram_id));
+  }
 }

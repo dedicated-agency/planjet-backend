@@ -171,4 +171,33 @@ export class UserService {
             console.log("Project show by id: " + error);
         }
     }
+
+    async events(user_id: string)
+    {
+        const checkUser = await this.prisma.user.findUnique({
+            where: {
+                telegram_id: user_id
+            }
+        });
+        if(!checkUser) return [];
+        const events = await this.prisma.notification.findMany({
+            where: {
+                user_id: checkUser.telegram_id,
+                is_viewed: '0'
+            },
+            include: {
+                change: {
+                    include: {
+                        task: {
+                            include: {
+                                project: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        return events;
+    }
 }

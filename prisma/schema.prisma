@@ -26,6 +26,7 @@ model User {
   taskUser TaskUser[]
   taskChange TaskChange[]
   taskComment TaskComment[]
+  notification Notification[]
 }
 
 model Group {
@@ -58,7 +59,7 @@ model Project {
   delete_permission Boolean @default(false)
   comment_permission Boolean @default(false)
   notification_lang String @default("en")
-
+  is_selected Boolean @default(false)
 
   group Group? @relation(fields: [group_id], references: [id])
   tasks Task[]
@@ -88,7 +89,7 @@ model Task {
   is_completed Boolean @default(false)
   is_archive Boolean @default(false)
   priority Int @default(2) //1,2,3
-  point Int?
+  point Int? 
   point_type String?
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
@@ -122,6 +123,7 @@ model TaskChange {
 
   task Task @relation(fields: [task_id], references: [id])
   user User @relation(fields: [user_id], references: [telegram_id])
+  notification Notification[]
 }
 
 model TaskComment {
@@ -133,5 +135,15 @@ model TaskComment {
   created_at DateTime @default(now())
 
   task Task @relation(fields: [task_id], references: [id])
+  user User @relation(fields: [user_id], references: [telegram_id])
+}
+
+model Notification {
+  id Int @id @default(autoincrement())
+  change_id Int
+  user_id String
+  is_viewed String
+
+  change TaskChange @relation(fields: [change_id], references: [id])
   user User @relation(fields: [user_id], references: [telegram_id])
 }

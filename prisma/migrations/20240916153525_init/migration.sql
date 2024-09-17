@@ -28,7 +28,7 @@ CREATE TABLE `GroupUser` (
 -- CreateTable
 CREATE TABLE `Project` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `group_id` VARCHAR(191) NOT NULL,
+    `group_id` VARCHAR(191) NULL,
     `topic_id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
     `add_permission` BOOLEAN NOT NULL DEFAULT false,
@@ -38,6 +38,7 @@ CREATE TABLE `Project` (
     `delete_permission` BOOLEAN NOT NULL DEFAULT false,
     `comment_permission` BOOLEAN NOT NULL DEFAULT false,
     `notification_lang` VARCHAR(191) NOT NULL DEFAULT 'en',
+    `is_selected` BOOLEAN NOT NULL DEFAULT false,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -66,6 +67,8 @@ CREATE TABLE `Task` (
     `is_completed` BOOLEAN NOT NULL DEFAULT false,
     `is_archive` BOOLEAN NOT NULL DEFAULT false,
     `priority` INTEGER NOT NULL DEFAULT 2,
+    `point` INTEGER NULL,
+    `point_type` VARCHAR(191) NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -98,8 +101,19 @@ CREATE TABLE `TaskComment` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `task_id` INTEGER NOT NULL,
     `user_id` VARCHAR(191) NOT NULL,
+    `message_id` VARCHAR(191) NULL,
     `comment` TEXT NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Notification` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `change_id` INTEGER NOT NULL,
+    `user_id` VARCHAR(191) NOT NULL,
+    `is_viewed` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -111,7 +125,7 @@ ALTER TABLE `GroupUser` ADD CONSTRAINT `GroupUser_user_id_fkey` FOREIGN KEY (`us
 ALTER TABLE `GroupUser` ADD CONSTRAINT `GroupUser_group_id_fkey` FOREIGN KEY (`group_id`) REFERENCES `Group`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Project` ADD CONSTRAINT `Project_group_id_fkey` FOREIGN KEY (`group_id`) REFERENCES `Group`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Project` ADD CONSTRAINT `Project_group_id_fkey` FOREIGN KEY (`group_id`) REFERENCES `Group`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Status` ADD CONSTRAINT `Status_project_id_fkey` FOREIGN KEY (`project_id`) REFERENCES `Project`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -142,3 +156,9 @@ ALTER TABLE `TaskComment` ADD CONSTRAINT `TaskComment_task_id_fkey` FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE `TaskComment` ADD CONSTRAINT `TaskComment_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`telegram_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Notification` ADD CONSTRAINT `Notification_change_id_fkey` FOREIGN KEY (`change_id`) REFERENCES `TaskChange`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Notification` ADD CONSTRAINT `Notification_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`telegram_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
