@@ -1,13 +1,14 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { Response } from 'express';
+import { UserGuard } from 'src/user/user.guard';
 
 @Controller('project')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
   @Get("show/:project_id")
-  @UseGuards(UseGuards)
+  @UseGuards(UserGuard)
   async showById(
     @Param("project_id") project_id: number,
     @Res() response: Response,
@@ -30,7 +31,7 @@ export class ProjectController {
   }
 
   @Get(":group_id")
-  @UseGuards(UseGuards)
+  @UseGuards(UserGuard)
   async main(
     @Param("group_id") group_id: number,
     @Res() response: Response
@@ -39,7 +40,7 @@ export class ProjectController {
   }
 
   @Delete(":id")
-  @UseGuards(UseGuards)
+  @UseGuards(UserGuard)
   async deleteFunc(
     @Param("id") id: number,
     @Res() response: Response,
@@ -48,7 +49,7 @@ export class ProjectController {
   }
 
   @Put(":id/notification")
-  @UseGuards(UseGuards)
+  @UseGuards(UserGuard)
   async notification(
     @Param("id") id: number,
     @Res() response: Response,
@@ -56,5 +57,14 @@ export class ProjectController {
     @Body("value") value: boolean
   ){
     return response.json(await this.projectService.notification(id, type, value))
+  }
+
+  @Get(":id/archive")
+  @UseGuards(UserGuard)
+  async archives(
+    @Param("id") id: number,
+    @Res() response: Response,
+  ){
+    return response.json(await this.projectService.archives(id))
   }
 }

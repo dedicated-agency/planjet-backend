@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -226,4 +226,41 @@ export class GroupService {
             name: "Completed",
         }
     ];
+
+    async selected(id: string, is_selected: string)
+    {
+        const check = await this.prisma.group.findFirst({
+            where: {
+                id
+            }
+        });
+        if(!check) throw new BadRequestException("Group not found");
+        return await this.prisma.group.update({
+            where: { id },
+            data: {
+                is_selected: Boolean(is_selected)
+            }
+        })
+    }
+
+    async selectedGroups(user_id: string)
+    {
+        return await this.prisma.group.findMany({
+            where: {
+                is_selected: true,
+                groupUsers: {
+                    some: {
+                        user_id
+                    }
+                }
+            },
+            include: {
+                groupUsers: {
+                    include: {
+                        user: true
+                    }
+                }
+            }
+        })
+    }
 }

@@ -47,10 +47,22 @@ export class UserController {
   @UseGuards(UserGuard)
   async events(
     @Req() req,
-    @Res() response: Response
+    @Res() response: Response,
+    @Query("is_viewed") is_viewed: string
   )
   {
     const {user} = req;
-    return response.json(await this.userService.events(user.telegram_id));
+    return response.json(await this.userService.events(user.telegram_id, is_viewed));
   }
+
+  @Get("groups")
+  @UseGuards(UserGuard)
+  async groups(
+    @Req() req,
+    @Res() response: Response,
+  ){
+    const {user} = req;
+    return response.json(await this.userService.groups(user.telegram_id));
+  }
+
 }

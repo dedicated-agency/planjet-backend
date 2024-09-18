@@ -54,10 +54,17 @@ export class UserService {
         });
 
         if(!project){
+            const myGroup = await this.prisma.group.create({
+                data: {
+                    id: '100' + user_id,
+                    name: "My Tasks"
+                }
+            });
             project = await this.prisma.project.create({
                 data: {
                     topic_id: user_id,
-                    name: "mytasks"
+                    name: "mytasks",
+                    group_id: '100' + user_id
                 }
             });
 
@@ -172,19 +179,27 @@ export class UserService {
         }
     }
 
-    async events(user_id: string)
+    async events(user_id: string, is_viewed: string)
     {
+
         const checkUser = await this.prisma.user.findUnique({
             where: {
                 telegram_id: user_id
             }
         });
         if(!checkUser) return [];
+
+        let mainQuery = {
+            user_id: checkUser.telegram_id,
+            is_viewed: false
+        }
+        if(is_viewed === '1')
+        {
+            mainQuery.is_viewed = true
+        }
+
         const events = await this.prisma.notification.findMany({
-            where: {
-                user_id: checkUser.telegram_id,
-                is_viewed: '0'
-            },
+            where: mainQuery,
             include: {
                 change: {
                     include: {
@@ -199,5 +214,27 @@ export class UserService {
         });
 
         return events;
+    }
+
+    async groups(user_id: string) 
+    {
+        const checkUser = await this.prisma.user.findUnique({
+            where: {
+                telegram_id: user_id
+            }
+        });
+        if(!checkUser) return [];
+        return await this.prisma.group.findMany({
+            where: {
+                groupUsers: {
+                    some: {
+                        user_id
+                    }
+                }
+            },
+            include: {
+                projects: true
+            }
+        });
     }
 }

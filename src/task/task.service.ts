@@ -329,7 +329,24 @@ export class TaskService {
                 }
             });
 
-            if(change) await this.notification.send(task.project.group_id, change.id, 'en')
+            if(change){
+                await this.notification.send(task.project.group_id, change.id, 'en')
+
+                const taskUsers = await this.prisma.taskUser.findMany({
+                    where: {
+                        task_id: taskId
+                    }
+                });
+
+                for (const taskUser of taskUsers) {
+                    await this.prisma.notification.create({
+                        data: {
+                            change_id: Number(change.id),
+                            user_id: taskUser.user_id
+                        }
+                    });
+                }
+            } 
 
             return {
                 message: "Status successfully changed"

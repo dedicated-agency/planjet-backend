@@ -109,10 +109,6 @@ export class TaskController {
     @Body("archive") archive: any, 
   ){
     const {user} = req;
-    console.log({
-      archive
-    });
-    
     return response.json(await this.taskService.archive(user.telegram_id, id, archive))
   }
 

@@ -182,7 +182,6 @@ export class ProjectService {
             });
             if(!check) throw new NotFoundException("Project not found");
 
-
             if (check.tasks.length > 0) {
                 for (const task of check.tasks) {
                     try {
@@ -251,6 +250,9 @@ export class ProjectService {
         }else if(type === 'comment')
         {
             data.comment_permission = value
+        }else if(type === 'is_selected')
+        {
+            data.is_selected = value
         }
 
         try {
@@ -263,5 +265,18 @@ export class ProjectService {
         } catch (error) {
             console.log("Edit permission error " + error);
         }
+    }
+
+    async archives(id: number)
+    {
+        return await this.prisma.task.findMany({
+            where: {
+                project_id: Number(id),
+                is_archive: true
+            },
+            include: {
+                status: true,
+            }
+        });
     }
 }

@@ -32,6 +32,7 @@ model User {
 model Group {
   id String @id
   name String
+  is_selected Boolean @default(false)
 
   groupUsers GroupUser[]
   projects Project[]
@@ -142,7 +143,7 @@ model Notification {
   id Int @id @default(autoincrement())
   change_id Int
   user_id String
-  is_viewed String
+  is_viewed Boolean @default(false)
 
   change TaskChange @relation(fields: [change_id], references: [id])
   user User @relation(fields: [user_id], references: [telegram_id])

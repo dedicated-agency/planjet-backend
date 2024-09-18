@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
 import { GroupService } from './group.service';
 import { Response } from 'express';
 import { UserGuard } from 'src/user/user.guard';
@@ -15,6 +15,16 @@ export class GroupController {
   ){
     const {user} = req;
     return response.json(await this.groupService.main(user.telegram_id))
+  }
+
+  @Get("selected")
+  @UseGuards(UserGuard)
+  async selectedGroups(
+    @Req() req,
+    @Res() response: Response
+  ){
+    const {user} = req;
+    return response.json(await this.groupService.selectedGroups(user.id))
   }
 
   @Post("init")
@@ -37,5 +47,17 @@ export class GroupController {
   ){
     const {user} = req;
     return response.json(await this.groupService.showById(user.id, id))
+  }
+
+  @Put(":id")
+  @UseGuards(UserGuard)
+  async selected(
+    @Body("is_selected") is_selected: string,
+    @Req() req,
+    @Res() response: Response,
+    @Param("id") id: string,
+  ){
+    const {user} = req;
+    return response.json(await this.groupService.selected(id, is_selected))
   }
 }
