@@ -106,7 +106,7 @@ export class TaskService {
                 }
             });  
 
-            await this.prisma.taskChange.create({
+            const change = await this.prisma.taskChange.create({
                 data: {
                     user_id: String(user_id),
                     task_id: Number(newTask.id),
@@ -116,7 +116,21 @@ export class TaskService {
                 }
             });
 
-            await this.notification.send(newTask.project.group_id, 13, newTask.user.language_code, "createTask", newTask);
+            if(change){
+                await this.notification.send(newTask.project.group_id, 13, newTask.user.language_code, "createTask", newTask);
+
+                const taskUsers = await this.prisma.taskUser.findMany({
+                    where: {
+                        task_id:  Number(newTask.id)
+                    }
+                });
+
+                for (const taskUser of taskUsers) {
+                    await this.createNotification(Number(change.id), taskUser.user_id)
+                }
+            } 
+
+       
 
             await this.prisma.taskUser.createMany({
                 data: participant.map((part: any) => ({
@@ -339,12 +353,7 @@ export class TaskService {
                 });
 
                 for (const taskUser of taskUsers) {
-                    await this.prisma.notification.create({
-                        data: {
-                            change_id: Number(change.id),
-                            user_id: taskUser.user_id
-                        }
-                    });
+                    await this.createNotification(Number(change.id), taskUser.user_id)
                 }
             } 
 
@@ -394,7 +403,19 @@ export class TaskService {
                 }
             });
 
-            if(change) this.notification.send(task.project.group_id, change.id, 'en')
+            if(change) {
+                await this.notification.send(task.project.group_id, change.id, 'en');
+
+                const taskUsers = await this.prisma.taskUser.findMany({
+                    where: {
+                        task_id: Number(id)
+                    }
+                });
+
+                for (const taskUser of taskUsers) {
+                    await this.createNotification(Number(change.id), taskUser.user_id)
+                }
+            }
 
             return {
                 message: "Status successfully changed"
@@ -405,7 +426,7 @@ export class TaskService {
         }
     }
 
-    async show(id: number)
+    async show(id: number, user_id: string)
     {
         try {
             const task: any = await this.prisma.task.findUnique({
@@ -444,7 +465,9 @@ export class TaskService {
                         }
                     }
                 }
-            })
+            });
+
+            await this.viewed(user_id, task.id)
 
             return task;
         } catch (error) {
@@ -561,6 +584,9 @@ export class TaskService {
             const task = await this.prisma.task.findUnique({
                 where: {
                     id: Number(id)
+                },
+                include: {
+                    project: true
                 }
             });
             if(!task) throw new NotFoundException("Task not found");
@@ -584,6 +610,30 @@ export class TaskService {
                     }
                 });
             }
+
+            const change = await this.prisma.taskChange.create({
+                data: {
+                    user_id: String(user_id),
+                    task_id: Number(id),
+                    type: "archive",
+                    old_value: "",
+                    new_value: "Task was archived"
+                }
+            });
+
+            if(change){
+                await this.notification.send(task.project.group_id, change.id, 'en')
+
+                const taskUsers = await this.prisma.taskUser.findMany({
+                    where: {
+                        task_id:  Number(id)
+                    }
+                });
+
+                for (const taskUser of taskUsers) {
+                    await this.createNotification(Number(change.id), taskUser.user_id)
+                }
+            } 
             return "Successfully changed";
         } catch (error) {
             console.log("Archive error: " + error);
@@ -626,7 +676,19 @@ export class TaskService {
                     }
                 });
     
-                if(change) this.notification.send(task.project.group_id, change.id, 'en')
+                if(change) {
+                    await this.notification.send(task.project.group_id, change.id, 'en');
+                    
+                    const taskUsers = await this.prisma.taskUser.findMany({
+                        where: {
+                            task_id:  Number(id)
+                        }
+                    });
+    
+                    for (const taskUser of taskUsers) {
+                        await this.createNotification(Number(change.id), taskUser.user_id)
+                    }
+                }
                 return comment
             }
 
@@ -699,7 +761,7 @@ export class TaskService {
                         });
                     }
 
-                    await this.prisma.taskChange.create({
+                    const change = await this.prisma.taskChange.create({
                         data: {
                             task_id: Number(id),
                             user_id: String(telegram_id),
@@ -708,6 +770,19 @@ export class TaskService {
                             type: "participant"
                         }
                     });
+
+                    if(change)
+                    {
+                        const taskUsers = await this.prisma.taskUser.findMany({
+                            where: {
+                                task_id:  Number(id)
+                            }
+                        });
+        
+                        for (const taskUser of taskUsers) {
+                            await this.createNotification(Number(change.id), taskUser.user_id)
+                        }
+                    }
                 }
                 
             }
@@ -716,6 +791,61 @@ export class TaskService {
         } catch (error) {
             console.log("Update participant error: " + error);
         }
+    }
+
+    async viewed(user_id: string, task_id: number)
+    {
+        const changes = await this.prisma.taskChange.findMany({
+            where: {
+                task_id: Number(task_id),
+                user_id
+            }
+        });
+
+        if(changes.length) return;
+
+        for (const change of changes) {
+            const checkChange = await this.prisma.notification.findFirst({
+                where: {
+                    change_id: Number(change.id),
+                    user_id
+                }
+            });
+
+            if(checkChange)
+            {
+                await this.prisma.notification.update({
+                    where: {
+                        id: checkChange.id
+                    }, 
+                    data: {
+                        is_viewed: true
+                    }
+                })
+            }
+        }
+
+    }
+
+    async createNotification(change_id: number, user_id: string)
+    {
+        const check = await this.prisma.notification.findFirst({
+            where: {
+                change_id: Number(change_id),
+                user_id,
+            }
+        });
+
+        if(!check) {
+            await this.prisma.notification.create({
+                data: {
+                    change_id: Number(change_id),
+                    user_id,
+                    is_viewed: false,
+                }
+            });
+        }
+        return;
     }
 }
 

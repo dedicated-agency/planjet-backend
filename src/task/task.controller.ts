@@ -47,7 +47,7 @@ export class TaskController {
     @Param("id") id: number,
   ){
     const {user} = req;
-    return response.json(await this.taskService.show(id))
+    return response.json(await this.taskService.show(id, user.id))
   }
 
 
