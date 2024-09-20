@@ -178,7 +178,11 @@ export class GroupService {
                             }
                         }
                     },
-                    groupUsers: true,
+                    groupUsers: {
+                        include: {
+                            user: true
+                        }
+                    },
                 }
             });
 
