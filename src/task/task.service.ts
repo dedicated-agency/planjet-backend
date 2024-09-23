@@ -802,7 +802,7 @@ export class TaskService {
             }
         });
 
-        if(changes.length) return;
+        if(!changes.length) return;
 
         for (const change of changes) {
             const checkChange = await this.prisma.notification.findFirst({
