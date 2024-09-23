@@ -32,7 +32,6 @@ model User {
 model Group {
   id String @id
   name String
-  is_selected Boolean @default(false)
 
   groupUsers GroupUser[]
   projects Project[]
@@ -41,6 +40,7 @@ model Group {
 model GroupUser{
   group_id String
   user_id String
+  is_selected Boolean @default(false)
 
   @@unique([group_id, user_id])
 

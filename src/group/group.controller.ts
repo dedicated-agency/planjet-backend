@@ -24,7 +24,7 @@ export class GroupController {
     @Res() response: Response
   ){
     const {user} = req;
-    return response.json(await this.groupService.selectedGroups(user.id))
+    return response.json(await this.groupService.selectedGroups(user.telegram_id))
   }
 
   @Post("init")
@@ -58,6 +58,6 @@ export class GroupController {
     @Param("id") id: string,
   ){
     const {user} = req;
-    return response.json(await this.groupService.selected(id, is_selected))
+    return response.json(await this.groupService.selected(id, is_selected, user.telegram_id))
   }
 }

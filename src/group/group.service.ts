@@ -231,7 +231,7 @@ export class GroupService {
         }
     ];
 
-    async selected(id: string, is_selected: string)
+    async selected(id: string, is_selected: string, user_id: string)
     {
         const check = await this.prisma.group.findFirst({
             where: {
@@ -239,8 +239,13 @@ export class GroupService {
             }
         });
         if(!check) throw new BadRequestException("Group not found");
-        return await this.prisma.group.update({
-            where: { id },
+        return await this.prisma.groupUser.update({
+            where: { 
+                group_id_user_id: {
+                    group_id: id,
+                    user_id: user_id
+                }
+             },
             data: {
                 is_selected: Boolean(is_selected)
             }
@@ -251,10 +256,10 @@ export class GroupService {
     {
         return await this.prisma.group.findMany({
             where: {
-                is_selected: true,
                 groupUsers: {
                     some: {
-                        user_id
+                        user_id,
+                        is_selected: true
                     }
                 }
             },
