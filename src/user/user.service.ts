@@ -47,7 +47,7 @@ export class UserService {
             return {...result, token: this.encrypt(result.telegram_id)}
         }
 
-        return check
+        return {...check, token: this.encrypt(check.telegram_id)}
     }
 
     async tasks(user_id: string, status: string)
