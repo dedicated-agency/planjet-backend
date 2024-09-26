@@ -28,7 +28,7 @@ import { NotificationService } from './notification/notification.service';
     ProjectModule,
     TaskModule,
     StatusModule,
-    PhotoModule
+    PhotoModule,
   ],
   controllers: [],
   providers: [PrismaService, UserService, NotificationService],

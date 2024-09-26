@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
+import { publicEncrypt, privateDecrypt } from 'crypto';
+
+const publicKey = process.env.PUBLIC_KEY?.replace(/\\n/g, "\n");
+const privateKey = process.env.PRIVATE_KEY?.replace(/\\n/g, "\n");
+
 
 @Injectable()
 export class UserService {
@@ -31,7 +36,7 @@ export class UserService {
 
         if (!check) 
         {
-            return await this.prisma.user.create({
+            const result = await this.prisma.user.create({
                 data: {
                     telegram_id: String(id),
                     name: first_name,
@@ -39,149 +44,103 @@ export class UserService {
                     language_code: language_code ? language_code : "en",
                 }
             });  
+            return {...result, token: this.encrypt(result.telegram_id)}
         }
 
         return check
     }
 
-    async tasks(user_id: string, status: number)
+    async tasks(user_id: string, status: string)
     {
-        let project = await this.prisma.project.findFirst({
+        if(status === undefined) status = 'To do';
+        const tasks = await this.prisma.task.findMany({
             where: {
-                topic_id: user_id,
-                name: "mytasks"
+                taskUser: {
+                    some: {
+                        user_id
+                    }
+                },
+                status: {
+                    name: status
+                }
+            },
+            include: {
+                status: true,
+                project: true,
+            }
+        });
+       
+        return tasks;
+    }
+
+    async tasksHeader(user_id: string)
+    {
+        const tasks = await this.prisma.task.findMany({
+            where: {
+                taskUser: {
+                    some: {
+                        user_id
+                    }
+                }
+            },
+            include: {
+                status: true,
             }
         });
 
-        if(!project){
-            const myGroup = await this.prisma.group.create({
-                data: {
-                    id: '100' + user_id,
-                    name: "My Tasks"
-                }
-            });
-            project = await this.prisma.project.create({
-                data: {
-                    topic_id: user_id,
-                    name: "mytasks",
-                    group_id: '100' + user_id
-                }
-            });
+        const todo = [];
+        const process = [];
+        const test = [];
+        const completed = [];
 
-
-            let statuses: any = await this.prisma.status.findMany({
-                where: {
-                    project_id: Number(project.id)
-                }
-            });
-
-            // if(statuses.length === 0)
-            // {
-            //     statuses = await this.prisma.status.createMany({
-            //         data: this.statusList.map((element) => ({
-            //             name: element.name,
-            //             order: element.id,
-            //             project_id: Number(project.id) 
-            //         }))
-            //     });
-            // }
-
-            const status = await this.prisma.status.findFirst({
-                where: {
-                    project_id: Number(project.id)
-                },
-                orderBy: {
-                    order: "asc"
-                }
-            })
-        } 
-
-        const project_id = project.id;
-
-        if(!status)
+        if(tasks.length)
         {
-            const statusId = await this.prisma.status.findFirst({
-                where: {
-                    project_id: Number(project_id),
-                    order: 1
+            tasks.map((task) => {
+                if(task.status.name === 'To do')
+                {
+                    todo.push(task);
+                }
+                else if(task.status.name === 'In Progress')
+                {
+                    process.push(task);
+                }
+                else if(task.status.name === 'Testing')
+                {
+                    test.push(task);
+                }
+                else if(task.status.name === 'Completed')
+                {
+                    completed.push(task);
                 }
             });
-            if(statusId)
+        }
+
+        return [
             {
-                status = statusId.id
-            }else{
-                status = 0
-            } 
-        }
-
-        const queryCode: any = {
-            project_id: Number(project_id),
-            status_id: Number(status),
-            is_archive: false
-        }
-
-        if(user_id)
-        {
-            const user = await this.prisma.user.findUnique({
-                where: {
-                    telegram_id: String(user_id)
-                }
-            });
-            if(!user) throw new NotFoundException("User not found");
-            queryCode.taskUser = {
-                some: {
-                    user_id: String(user_id)
-                }
+                id: 1,
+                name: 'To do',
+                count: todo.length
+            },
+            {
+                id: 2,
+                name: 'In Progress',
+                count: process.length
+            },
+            {
+                id: 3,
+                name: 'Testing',
+                count: test.length
+            },
+            {
+                id: 4,
+                name: 'Completed',
+                count: completed.length
             }
-        }
-  
-        try {
-            const project: any = await this.prisma.project.findUnique({
-                where: {
-                    id: Number(project_id)
-                },
-                include: {
-                    statuses: true
-                }
-            });
-
-            const tasks = await this.prisma.task.findMany({
-                where: queryCode,
-                include: {
-                    user: true,
-                    status: true
-                }
-            });
-
-            const users = await this.prisma.user.findMany({
-                where: {
-                    groupUsers: {
-                        some: {
-                            group: {
-                                projects: {
-                                    some: {
-                                        id: Number(project_id)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            })
-
-            if(!project)  return [];
-            project.users = users;
-            project.tasks = tasks ? tasks : [];
-
-            return project;
-        } catch (error) {
-            console.log("Project show by id: " + error);
-        }
+        ]
     }
 
     async events(user_id: string, is_viewed: string)
     {
-
         const checkUser = await this.prisma.user.findUnique({
             where: {
                 telegram_id: user_id
@@ -218,13 +177,7 @@ export class UserService {
 
     async groups(user_id: string) 
     {
-        const checkUser = await this.prisma.user.findUnique({
-            where: {
-                telegram_id: user_id
-            }
-        });
-        if(!checkUser) return [];
-        return await this.prisma.group.findMany({
+        const data = await this.prisma.group.findMany({
             where: {
                 groupUsers: {
                     some: {
@@ -233,8 +186,46 @@ export class UserService {
                 }
             },
             include: {
-                projects: true
+                projects: {
+                    include: {
+                        tasks: true
+                    }
+                },
+                groupUsers: true,
             }
         });
+
+        if(!data.length) return []
+
+        const result = [];
+
+        data.map((element) => {
+            let is_selected = false;
+
+            if(element.groupUsers.length)
+            {
+                element.groupUsers.map((groupUser) => {
+                    if(groupUser.user_id === user_id && groupUser.is_selected) is_selected = true;
+                });
+            }
+
+            result.push({
+                id: element.id,
+                name: element.name,
+                is_selected,
+            })
+        });
+
+        return result;
+    }
+
+    encrypt(data: string): string {
+        const encryptedData = publicEncrypt(publicKey, Buffer.from(data));
+        return encryptedData.toString('base64');
+    }
+    
+    decrypt(encryptedData: string): string {
+        const decryptedData = privateDecrypt(privateKey, Buffer.from(encryptedData, 'base64'));
+        return decryptedData.toString();
     }
 }

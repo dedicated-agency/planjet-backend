@@ -177,7 +177,7 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
         try {
              const text = `${topic ? languages[lang].manager_commands : languages[lang].add_bot_to_group}
 
-/manager ${languages[lang].open_app}
+/commands ${languages[lang].open_app}
 
 /add ${languages[lang].add_task}
 

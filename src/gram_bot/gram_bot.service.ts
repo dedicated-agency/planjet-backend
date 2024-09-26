@@ -127,9 +127,10 @@ export class GramBotService implements OnModuleInit {
                     this.sendPermissionImage(message.peerId.userId)
                 ]);
                 break;
-            case "/manager": 
+            case "/commands": 
                 await this.notificationService.addBotToChannel(chatId.channelId, 'en', topic);
                 break;
+            case "#task":
             case "/add":
                 if(message.replyTo && topic)
                 {

@@ -52,32 +52,32 @@ export class GroupService {
                         }
                     });
 
-                    const mytaskproject = await this.prisma.project.create({
-                        data: {
-                            name: "mytasks",
-                            topic_id: String(userId),
-                        }
-                    });
+                    // const mytaskproject = await this.prisma.project.create({
+                    //     data: {
+                    //         name: "mytasks",
+                    //         topic_id: String(userId),
+                    //     }
+                    // });
 
-                    if(mytaskproject)
-                    {
-                        let statuses: any = await this.prisma.status.findMany({
-                            where: {
-                                project_id: Number(mytaskproject.id)
-                            }
-                        });
+                    // if(mytaskproject)
+                    // {
+                    //     let statuses: any = await this.prisma.status.findMany({
+                    //         where: {
+                    //             project_id: Number(mytaskproject.id)
+                    //         }
+                    //     });
             
-                        if(statuses.length === 0)
-                        {
-                            statuses = await this.prisma.status.createMany({
-                                data: this.statusList.map((element) => ({
-                                    name: element.name,
-                                    order: element.id,
-                                    project_id: Number(mytaskproject.id) 
-                                }))
-                            });
-                        }
-                    }
+                    //     if(statuses.length === 0)
+                    //     {
+                    //         statuses = await this.prisma.status.createMany({
+                    //             data: this.statusList.map((element) => ({
+                    //                 name: element.name,
+                    //                 order: element.id,
+                    //                 project_id: Number(mytaskproject.id) 
+                    //             }))
+                    //         });
+                    //     }
+                    // }
                 }
             });
         }
@@ -254,7 +254,7 @@ export class GroupService {
 
     async selectedGroups(user_id: string)
     {
-        return await this.prisma.group.findMany({
+        const data = await this.prisma.group.findMany({
             where: {
                 groupUsers: {
                     some: {
@@ -268,8 +268,38 @@ export class GroupService {
                     include: {
                         user: true
                     }
+                },
+                projects: {
+                    include: {
+                        tasks: true
+                    }
                 }
             }
-        })
+        });
+
+        if(!data.length) return [];
+        const result = [];
+        
+        data.map((element) => {
+            const needData = {
+                id: element.id,
+                name: element.name,
+                groupUsers: element.groupUsers,
+                tasks: 0
+            };
+
+            if(element.projects.length)
+            {
+                let tasks = 0;
+                element.projects.map((project) => {
+                    tasks+=project.tasks.length
+                });
+                needData.tasks = tasks;
+            }
+            result.push(needData);
+
+        });
+
+        return result;
     }
 }

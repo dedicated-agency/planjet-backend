@@ -28,6 +28,7 @@
     "@nestjs/serve-static": "^4.0.2",
     "@prisma/client": "^5.17.0",
     "axios": "^1.7.2",
+    "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
     "nestjs-telegraf": "^2.8.1",
     "node-telegram-bot-api": "^0.66.0",

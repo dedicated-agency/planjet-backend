@@ -825,6 +825,7 @@ export class TaskService {
             }
         }
 
+        return
     }
 
     async createNotification(change_id: number, user_id: string)

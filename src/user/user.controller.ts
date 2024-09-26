@@ -27,10 +27,20 @@ export class UserController {
   async tasks(
     @Req() req,
     @Res() response: Response,
-    @Query("status") status: number,
+    @Query("status") status: string,
   ){
     const {user} = req;
     return response.json(await this.userService.tasks(user.telegram_id, status));
+  }
+
+  @Get("tasks/header")
+  @UseGuards(UserGuard)
+  async tasksHeader(
+    @Req() req,
+    @Res() response: Response,
+  ){
+    const {user} = req;
+    return response.json(await this.userService.tasksHeader(user.telegram_id));
   }
 
   @Get("status")
@@ -40,7 +50,7 @@ export class UserController {
     @Res() response: Response,
   ){
     const {user} = req;
-    return response.json(await this.userService.tasks(user.telegram_id, 1));
+    return response.json(await this.userService.tasks(user.telegram_id, 'To do'));
   }
 
   @Get("events")
@@ -65,4 +75,13 @@ export class UserController {
     return response.json(await this.userService.groups(user.telegram_id));
   }
 
+  @Get("checkrypt")
+  @UseGuards(UserGuard)
+  async checkdata(
+    @Req() req,
+  )
+  {
+    const {user} = req;
+    return  user
+  }
 }

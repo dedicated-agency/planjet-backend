@@ -133,7 +133,8 @@ export class ProjectService {
                 where: queryCode,
                 include: {
                     user: true,
-                    status: true
+                    status: true,
+                    taskComment: true,
                 }
             });
 
@@ -253,6 +254,17 @@ export class ProjectService {
         }else if(type === 'is_selected')
         {
             data.is_selected = value
+        }else if(type === 'edit')
+        {
+            data.edit_permission = value
+        }
+        else if(type === 'archive')
+        {
+            data.archive_permission = value
+        }
+        else if(type === 'delete')
+        {
+            data.delete_permission = value
         }
 
         try {
