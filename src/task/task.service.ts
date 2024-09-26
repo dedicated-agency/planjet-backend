@@ -445,11 +445,17 @@ export class TaskService {
                     taskChange: {
                         include: {
                             user: true,
+                        },
+                        orderBy: {
+                            id: "desc"
                         }
                     },
                     taskComment: {
                         include: {
                             user: true
+                        },
+                        orderBy: {
+                            id: "desc"
                         }
                     }
                 }
@@ -799,33 +805,70 @@ export class TaskService {
             where: {
                 task_id: Number(task_id),
                 user_id
+            },
+            select: {
+                id: true,
+                notification: {
+                    where: {
+                        user_id,
+                        is_viewed: false
+                    },
+                    select: {
+                        id: true
+                    }
+                }
             }
         });
-
-        if(!changes.length) return;
-
-        for (const change of changes) {
-            const checkChange = await this.prisma.notification.findFirst({
+    
+        if (!changes.length) return;
+    
+        const notificationIds = changes.flatMap(change =>
+            change.notification.map(notification => notification.id)
+        );
+    
+        if (notificationIds.length) {
+            await this.prisma.notification.updateMany({
                 where: {
-                    change_id: Number(change.id),
-                    user_id
+                    id: { in: notificationIds }
+                },
+                data: {
+                    is_viewed: true
                 }
             });
-
-            if(checkChange)
-            {
-                await this.prisma.notification.update({
-                    where: {
-                        id: checkChange.id
-                    }, 
-                    data: {
-                        is_viewed: true
-                    }
-                })
-            }
         }
+    
+        return;
+        // const changes = await this.prisma.taskChange.findMany({
+        //     where: {
+        //         task_id: Number(task_id),
+        //         user_id
+        //     }
+        // });
 
-        return
+        // if(!changes.length) return;
+
+        // for (const change of changes) {
+        //     const checkChange = await this.prisma.notification.findFirst({
+        //         where: {
+        //             change_id: Number(change.id),
+        //             user_id
+        //         }
+        //     });
+
+        //     if(checkChange)
+        //     {
+        //         await this.prisma.notification.update({
+        //             where: {
+        //                 id: checkChange.id
+        //             }, 
+        //             data: {
+        //                 is_viewed: true
+        //             }
+        //         })
+        //     }
+        // }
+
+        // return;
     }
 
     async createNotification(change_id: number, user_id: string)
