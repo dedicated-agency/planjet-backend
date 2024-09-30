@@ -824,9 +824,9 @@ export class TaskService {
         if (!changes.length) return;
     
         const notificationIds = changes.flatMap(change =>
-            change.notification.map(notification => {
-                if(notification.user_id === user_id) return notification.id             
-            })
+            change.notification
+            .map(notification => notification.user_id === user_id ? notification.id : null)
+            .filter(id => id !== null)
         );
     
         if (notificationIds.length) {
