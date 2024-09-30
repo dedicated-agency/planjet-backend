@@ -814,7 +814,8 @@ export class TaskService {
                         is_viewed: false
                     },
                     select: {
-                        id: true
+                        id: true,
+                        user_id: true
                     }
                 }
             }
@@ -823,7 +824,9 @@ export class TaskService {
         if (!changes.length) return;
     
         const notificationIds = changes.flatMap(change =>
-            change.notification.map(notification => notification.id)
+            change.notification.map(notification => {
+                if(notification.user_id === user_id) return notification.id             
+            })
         );
     
         if (notificationIds.length) {
