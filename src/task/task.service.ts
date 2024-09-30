@@ -828,6 +828,8 @@ export class TaskService {
             .map(notification => notification.user_id === user_id ? notification.id : null)
             .filter(id => id !== null)
         );
+
+        console.log({notificationIds});
     
         if (notificationIds.length) {
             await this.prisma.notification.updateMany({
