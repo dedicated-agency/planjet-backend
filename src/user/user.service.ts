@@ -215,6 +215,7 @@ export class UserService {
                 id: element.id,
                 name: element.name,
                 is_selected,
+                projects: element.projects
             })
         });
 
