@@ -838,37 +838,6 @@ export class TaskService {
         }
     
         return;
-        // const changes = await this.prisma.taskChange.findMany({
-        //     where: {
-        //         task_id: Number(task_id),
-        //         user_id
-        //     }
-        // });
-
-        // if(!changes.length) return;
-
-        // for (const change of changes) {
-        //     const checkChange = await this.prisma.notification.findFirst({
-        //         where: {
-        //             change_id: Number(change.id),
-        //             user_id
-        //         }
-        //     });
-
-        //     if(checkChange)
-        //     {
-        //         await this.prisma.notification.update({
-        //             where: {
-        //                 id: checkChange.id
-        //             }, 
-        //             data: {
-        //                 is_viewed: true
-        //             }
-        //         })
-        //     }
-        // }
-
-        // return;
     }
 
     async createNotification(change_id: number, user_id: string)

@@ -146,12 +146,14 @@ export class UserService {
                 telegram_id: user_id
             }
         });
+
         if(!checkUser) return [];
 
-        let mainQuery = {
+        let mainQuery: any = {
             user_id: checkUser.telegram_id,
             is_viewed: false
         }
+
         if(is_viewed === '1')
         {
             mainQuery.is_viewed = true

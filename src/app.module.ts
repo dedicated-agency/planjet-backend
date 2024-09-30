@@ -17,7 +17,7 @@ import { NotificationService } from './notification/notification.service';
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
-      serveRoot: '/public', // optional, defaults to '/'
+      serveRoot: '/public',
     }),
     ConfigModule.forRoot({
       isGlobal: true, 
