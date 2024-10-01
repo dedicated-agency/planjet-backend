@@ -184,7 +184,7 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
         }
     }
 
-    inlineKeyboard(url: string, lang: string = 'en', type: string = 'commands')
+    inlineKeyboard(url: string, lang: string = 'en', type: string = 'not')
     {
         const buttons = [];
 
