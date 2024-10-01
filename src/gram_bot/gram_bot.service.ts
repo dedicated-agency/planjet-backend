@@ -101,10 +101,10 @@ export class GramBotService implements OnModuleInit {
 
     private async handleNewMessage(event: any) {
         const message = event.message;
-        console.log({
-            message: message,
-            media: message.media
-        });
+        // console.log({
+        //     photo: message.media.photo,
+
+        // });
         
         if (!message) return;
         const chatId = message?.peerId;
@@ -137,6 +137,7 @@ export class GramBotService implements OnModuleInit {
             case "/commands@plan_jet_bot":
             case "/commands": 
                 await this.notificationService.addBotToChannel(chatId.channelId, 'en', topic);
+                await this.removeMessage(chatId.channelId, messageId);
                 break;
             
             case "/add@plan_jet_bot":
@@ -152,6 +153,7 @@ export class GramBotService implements OnModuleInit {
             case "/done":
                 if (message.replyTo && topic) {
                     await this.doneTask(message.replyTo.replyToMsgId, message.fromId.userId, messageId);
+                    await this.removeMessage(chatId.channelId, messageId);
                 } else {
                     await this.sendMessage(chatId, "Task not found", messageId);
                 }
@@ -162,9 +164,7 @@ export class GramBotService implements OnModuleInit {
                 }
                 
                 if(messageText.includes("#task") && topic){
-                    console.log('ckhasb');
-                    
-                   await this.createTask(chatId, messageId, message.fromId.userId, topic, 0);
+                    await this.createTask(chatId, messageId, message.fromId.userId, topic, 0);
                 }
                 break;
         }
@@ -210,20 +210,26 @@ export class GramBotService implements OnModuleInit {
         try {
             const message: any = await this.client.getMessages(chatId, {ids: messageId, limit: 1});
 
+
             if(message.length === 1 && message[0] === undefined)
             {
                 await this.sendMessage(chatId, "Bot is not admin, Please check admin permissions", messageId);
                 return
             }
 
+            console.log({
+                photo: message[0].media
+            });
+
             const usernameRegex = /@\w+/g;
             const usernames =  message[0].message.match(usernameRegex);
             const messageText =  message[0].message.replace(usernameRegex, '').trim();
+            const resultText = messageText.replace(/#task\s*/, '')
             const task = await this.taskService.init({
                 topic_id: topic.topic_id ? topic.topic_id : Number(topic.id),
                 topic_title: topic.title ? topic.title : topic.name,
                 message_id: Number(messageId),
-                name: messageText,
+                name: resultText,
                 user_id: Number(userId),
                 group_id: Number(chatId.channelId)
             });

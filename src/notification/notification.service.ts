@@ -177,7 +177,7 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
         try {
              const text = `${topic ? languages[lang].manager_commands : languages[lang].add_bot_to_group}
 
-<a href="${String(process.env.TELEGRAM_WEB_APP_URL)}">/dashboard</a> ${languages[lang].dashboard}
+/dashboard ${languages[lang].dashboard}
 
 /commands ${languages[lang].open_app}
 
@@ -196,52 +196,6 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
         }
     }
 
-    // async dashboardMessage(chat_id: number, lang: string = 'en', topic?: any)
-    // {
-    //     const data: any = {
-    //         chat_id: `-100${Number(chat_id)}`,
-    //         text: '',
-    //         parse_mode: 'html',
-    //         reply_markup: this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL))
-    //     };
-        
-    //     if(topic && topic.id) { 
-    //         let project = await this.prisma.project.findFirst({
-    //             where: {
-    //                 group_id: String(chat_id),
-    //                 topic_id: String(topic.id)
-    //             }
-    //         });
-            
-    //         if(!project)
-    //         {
-    //             project = await this.prisma.project.findFirst({
-    //                 where: {
-    //                     group_id: String(chat_id),
-    //                     topic_id: '1'
-    //                 }
-    //             });
-    //         }else{
-    //             data.message_thread_id = topic.id 
-    //         }
-    //         if(project)
-    //             {
-    //             data.reply_markup = this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL))
-    //         }
-
-    //         try {
-    //             const text = `${languages[lang].dashboard}`;
-   
-    //            data.text = text
-    //            await axios.post(this.url, data);
-    //            return "success";
-    //        } catch (error) {
-    //            console.log("Error add Bot to Channel: " + error);
-    //            console.log(error);
-    //        }
-    //     } 
-    // }
-
     inlineKeyboard(url: string, lang: string = 'en')
     {
         return {
@@ -250,6 +204,12 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
                     {
                         text: languages[lang].open_app,
                         url: url
+                    }
+                ],
+                [
+                    {
+                        text: languages[lang].open_app,
+                        url: String(process.env.TELEGRAM_WEB_APP_URL)
                     }
                 ]
             ]
