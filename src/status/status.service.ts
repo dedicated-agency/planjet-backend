@@ -112,6 +112,7 @@ export class StatusService {
             });
             const queryCode: any = {
                 project_id: Number(id),
+                is_archive: false,
             }
 
             if(user_ids.length)

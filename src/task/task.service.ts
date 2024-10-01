@@ -272,7 +272,8 @@ export class TaskService {
             return await this.prisma.task.findMany({
                 where: {
                     project_id: Number(id),
-                    status_id: Number(status_id)
+                    status_id: Number(status_id),
+                    is_archive: false,
                 },
                 include: {
                     user: true,
