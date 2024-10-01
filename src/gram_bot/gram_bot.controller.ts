@@ -15,9 +15,10 @@ export class GramBotController {
     const apiUrl = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/setMyCommands`;
 
     const commands = [
+      { command: 'dashboard', description: 'Приборная панель' },
       { command: 'commands', description: 'Команды' },
       { command: 'add', description: 'Создать задачу' },
-      { command: 'tasks', description: 'Просмотреть задачи проекта' },
+      // { command: 'tasks', description: 'Просмотреть задачи проекта' },
       { command: 'done', description: 'Завершить задачу' },
     ];
     return res.json((await axios.post(apiUrl, { commands })).data);

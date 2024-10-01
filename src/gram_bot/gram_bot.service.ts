@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { GroupService } from 'src/group/group.service';
 import { ProjectService } from 'src/project/project.service';
-import { StatusService } from 'src/status/status.service';
+// import { StatusService } from 'src/status/status.service';
 import { TaskService } from 'src/task/task.service';
 import { UserService } from 'src/user/user.service';
 import { TelegramClient, Api } from 'telegram';
@@ -12,7 +12,7 @@ import * as path from 'path';
 import { CustomFile } from 'telegram/client/uploads';
 import { NotificationService } from 'src/notification/notification.service';
 import { PrismaService } from 'src/prisma.service';
-import { EditedMessage } from 'telegram/events/EditedMessage';
+// import { EditedMessage } from 'telegram/events/EditedMessage';
 import { EventBuilder } from 'telegram/events/common';
 
 interface InitTask {
@@ -35,7 +35,7 @@ export class GramBotService implements OnModuleInit {
         private readonly taskService: TaskService,
         private readonly userService: UserService,
         private readonly groupService: GroupService,
-        private readonly statusService: StatusService,
+        // private readonly statusService: StatusService,
         private readonly projectService: ProjectService,
         private readonly notificationService: NotificationService,
         private readonly prisma: PrismaService,
@@ -127,10 +127,16 @@ export class GramBotService implements OnModuleInit {
                     this.sendPermissionImage(message.peerId.userId)
                 ]);
                 break;
+            case "/dashboard@plan_jet_bot":
+            case "/dashboard": 
+                await this.notificationService.addBotToChannel(chatId.channelId, 'en', topic);
+                break;
+            case "/commands@plan_jet_bot":
             case "/commands": 
                 await this.notificationService.addBotToChannel(chatId.channelId, 'en', topic);
                 break;
-            case "#task":
+            
+            case "/add@plan_jet_bot":
             case "/add":
                 if(message.replyTo && topic)
                 {
@@ -139,6 +145,7 @@ export class GramBotService implements OnModuleInit {
                     await this.sendMessage(chatId, "Task not found", messageId);
                 }
                 break;
+            case "/done@plan_jet_bot":
             case "/done":
                 if (message.replyTo && topic) {
                     await this.doneTask(message.replyTo.replyToMsgId, message.fromId.userId, messageId);
@@ -149,6 +156,12 @@ export class GramBotService implements OnModuleInit {
             default:
                 if (message.replyTo) {
                     await this.commentCreate(message.replyTo.replyToMsgId, message.fromId.userId, messageId, messageText)
+                }
+                
+                if(messageText.includes("#task") && topic){
+                    console.log('ckhasb');
+                    
+                   await this.createTask(chatId, messageId, message.fromId.userId, topic, 0);
                 }
                 break;
         }
@@ -165,7 +178,7 @@ export class GramBotService implements OnModuleInit {
                     project: true
                 }
             });
-                
+            if(!task) return;
             const result = await this.taskService.updateStatus(userId, -1, task.id);
             if(result?.message === "Status successfully changed")
             {
@@ -224,7 +237,7 @@ export class GramBotService implements OnModuleInit {
             {
                 await Promise.all([
                     this.notificationService.send(task.project.group_id, checkChange.id, task.user.language_code, "createTask", task), 
-                    this.removeMessage(task.project.group_id, doneMessageId), 
+                    doneMessageId && this.removeMessage(task.project.group_id, doneMessageId), 
                     this.taskService.createNotification(checkChange.id, String(userId)),
                     this.client.invoke(
                         new Api.messages.SendReaction({

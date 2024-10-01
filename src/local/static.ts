@@ -30,7 +30,8 @@ export const languages = {
         "tasks": "Loyiha vazifalari",
         "task_done": "Vazifa muvaffaqiyatli tugallandi",
         "manager_commands": "Menejer buyruqlari",
-        "comment": "Izoh"
+        "comment": "Izoh",
+        "dashboard": "Dashboard"
     },
     "en": {
         "my_tasks": "My tasks",
@@ -63,7 +64,8 @@ export const languages = {
         "tasks": "Project tasks",
         "task_done": "The task is successfully completed",
         "manager_commands": "Manager commands",
-        "comment": "Comment"
+        "comment": "Comment",
+        "dashboard": "Dashboard"
     },
     "ru": {
         "my_tasks": "Мои задачи",
@@ -96,6 +98,7 @@ export const languages = {
         "tasks": "Задачи проекта",
         "task_done": "Задача успешно выполнена",
         "manager_commands": "Команды менеджера",
-        "comment": "Комментарий"
+        "comment": "Комментарий",
+        "dashboard": "Приборная панель"
     }
 }
