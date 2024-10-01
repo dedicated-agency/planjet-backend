@@ -225,6 +225,7 @@ export class GramBotService implements OnModuleInit {
                 await Promise.all([
                     this.notificationService.send(task.project.group_id, checkChange.id, task.user.language_code, "createTask", task), 
                     this.removeMessage(task.project.group_id, doneMessageId), 
+                    this.taskService.createNotification(checkChange.id, String(userId)),
                     this.client.invoke(
                         new Api.messages.SendReaction({
                             peer: `-100${task.project.group_id}`,

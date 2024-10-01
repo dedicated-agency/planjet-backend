@@ -850,22 +850,13 @@ export class TaskService {
 
     async createNotification(change_id: number, user_id: string)
     {
-        const check = await this.prisma.notification.findFirst({
-            where: {
+        await this.prisma.notification.create({
+            data: {
                 change_id: Number(change_id),
                 user_id,
+                is_viewed: false,
             }
         });
-
-        if(!check) {
-            await this.prisma.notification.create({
-                data: {
-                    change_id: Number(change_id),
-                    user_id,
-                    is_viewed: false,
-                }
-            });
-        }
         return;
     }
 }
