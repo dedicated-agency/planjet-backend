@@ -137,7 +137,7 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
             chat_id: `-100${Number(chat_id)}`,
             text: '',
             parse_mode: 'html',
-            reply_markup: this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL), 'commands')
+            reply_markup: this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL), 'en', 'commands')
         };
         
         if(topic && topic.id) { 
@@ -161,7 +161,7 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
             }
             if(project)
                 {
-                data.reply_markup = this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=projects_${project.id}`, 'commands')
+                data.reply_markup = this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=projects_${project.id}`, 'en', 'commands')
             }
         }
 
@@ -190,6 +190,8 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
 
         if(type === 'commands')
         {
+            console.log(lang);
+            
             buttons.push([{
                 text: languages[lang].dashboard,
                 url: String(process.env.TELEGRAM_WEB_APP_URL)
