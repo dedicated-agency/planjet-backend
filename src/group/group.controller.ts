@@ -46,7 +46,7 @@ export class GroupController {
     @Res() response: Response
   ){
     const {user} = req;
-    return response.json(await this.groupService.showById(user.id, id))
+    return response.json(await this.groupService.showById(user.telegram_id, id))
   }
 
   @Put(":id")

@@ -47,9 +47,8 @@ export class TaskController {
     @Param("id") id: number,
   ){
     const {user} = req;
-    return response.json(await this.taskService.show(id, user.id))
+    return response.json(await this.taskService.show(id, user.telegram_id))
   }
-
 
   @Get(":id/:status")
   @UseGuards(UserGuard)
@@ -60,7 +59,7 @@ export class TaskController {
     @Param("status") status: number,
   ){
     const {user} = req;
-    return response.json(await this.taskService.tasks(user.id, status, id))
+    return response.json(await this.taskService.tasks(user.telegram_id, status, id))
   }
 
   @Put(":id/status")

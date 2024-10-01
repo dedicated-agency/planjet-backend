@@ -803,8 +803,7 @@ export class TaskService {
     {
         const changes = await this.prisma.taskChange.findMany({
             where: {
-                task_id: Number(task_id),
-                user_id
+                task_id: Number(task_id)
             },
             select: {
                 id: true,
@@ -822,15 +821,18 @@ export class TaskService {
         });
     
         if (!changes.length) return;
-    
-        const notificationIds = changes.flatMap(change =>
-            change.notification
-            .map(notification => notification.user_id === user_id ? notification.id : null)
-            .filter(id => id !== null)
-        );
+        
+        const notificationIds: number[] = changes.reduce((ids, change) => {
+            if (change.notification.length) {
+                change.notification.forEach((noti) => {
+                    if (noti.user_id === user_id) {
+                        ids.push(noti.id);
+                    }
+                });
+            }
+            return ids;
+        }, []);
 
-        console.log({notificationIds});
-    
         if (notificationIds.length) {
             await this.prisma.notification.updateMany({
                 where: {
