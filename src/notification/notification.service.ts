@@ -82,12 +82,9 @@ export class NotificationService {
             return {
                 text: `#${languages[lang].change} by ${change.user.name}
 
-<b>${change.task.name}</b>
-
+<b>${change.task.name.length > 50 ? change.task.name.substring(0, 50) + "..." : change.task.name}</b>
 ${languages[lang].project}: <b>${change.task.project.name} 💻</b>
-
 ${languages[lang].author}: <b>${change.task.user.name}</b>
-   
 ${languages[lang][change.type]}: <b>${change.old_value} ➡️  ${change.new_value}</b> 
 `,
     inlineKeyboard: this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=tasks_${change.task_id}`)
@@ -103,12 +100,9 @@ ${languages[lang][change.type]}: <b>${change.old_value} ➡️  ${change.new_val
             return {
                 text: `#task by ${task.user.name}
 
-<b>${task.name}</b>
-
+<b>${task.name.length > 50 ? task.name.substring(0, 50) + "..." : task.name}</b>
 ${languages[lang].project}: <b>${task.project.name} 💻</b>
-
 ${languages[lang].author}: <b>${task.user.name}</b>
-   
 <b>${languages[lang].task_created}</b> 
 `,
     inlineKeyboard: this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=tasks_${task.id}`)
@@ -124,12 +118,9 @@ ${languages[lang].author}: <b>${task.user.name}</b>
             return {
                 text: `#comment by ${change.user.name}
 
-<b>${change.task.name}</b>
-
+<b>${change.task.name.length > 50 ? change.task.name.substring(0, 50) + "..." : change.task.name}</b>
 ${languages[lang].project}: <b>${change.task.project.name} 💻</b>
-
 ${languages[lang].author}: <b>${change.task.user.name}</b>
-   
 ${languages[lang].comment}: <b>${change.new_value}</b> 
 `,
                 inlineKeyboard: this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=tasks_${change.task_id}`)
@@ -146,7 +137,7 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
             chat_id: `-100${Number(chat_id)}`,
             text: '',
             parse_mode: 'html',
-            reply_markup: this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL))
+            reply_markup: this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL), 'commands')
         };
         
         if(topic && topic.id) { 
@@ -170,7 +161,7 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
             }
             if(project)
                 {
-                data.reply_markup = this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=projects_${project.id}`)
+                data.reply_markup = this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=projects_${project.id}`, 'commands')
             }
         }
 
@@ -178,11 +169,8 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
              const text = `${topic ? languages[lang].manager_commands : languages[lang].add_bot_to_group}
 
 /dashboard ${languages[lang].dashboard}
-
 /commands ${languages[lang].open_app}
-
 /add ${languages[lang].add_task}
-
 /done ${languages[lang].task_done}`;
 
 // /tasks ${languages[lang].tasks}
@@ -196,25 +184,25 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
         }
     }
 
-    inlineKeyboard(url: string, lang: string = 'en')
+    inlineKeyboard(url: string, lang: string = 'en', type: string = 'commands')
     {
-        const buttons = [
-            [
-                {
-                    text: languages[lang].dashboard,
-                    url: String(process.env.TELEGRAM_WEB_APP_URL)
-                }
-            ]
-        ];
+        const buttons = [];
 
-        if(url !== String(process.env.TELEGRAM_WEB_APP_URL))
+        if(type === 'commands')
         {
-            buttons.push([
-                {
-                    text: languages[lang].open_app,
-                    url: url
-                }
-            ])
+            buttons.push([{
+                text: languages[lang].dashboard,
+                url: String(process.env.TELEGRAM_WEB_APP_URL)
+            }]);
+            buttons.push([{
+                text: languages[lang].open_app,
+                url: url
+            }])
+        }else{
+            buttons.push([{
+                text: languages[lang].open_task,
+                url: url
+            }])
         }
 
         return {

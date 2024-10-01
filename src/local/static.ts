@@ -25,13 +25,14 @@ export const languages = {
         "priority": "ustuvorlik",
         'task_created': "Yangi task yaratildi",
         "add_bot_to_group": "Manager muvaffaqyatli qo'shildi",
-        "open_app": "Ilovani ochish",
+        "open_app": "Loyihani ochish",
         "add_task": "Vazifa qo'shish",
         "tasks": "Loyiha vazifalari",
         "task_done": "Vazifa muvaffaqiyatli tugallandi",
         "manager_commands": "Menejer buyruqlari",
         "comment": "Izoh",
-        "dashboard": "Dashboard"
+        "dashboard": "Dashboard",
+        "open_task": "Vazifani oching"
     },
     "en": {
         "my_tasks": "My tasks",
@@ -59,13 +60,14 @@ export const languages = {
         "priority": "priority",
         'task_created': "New task created",
         "add_bot_to_group": "Manager successfully added",
-        "open_app": "Open the app",
+        "open_app": "Open the project",
         "add_task": "Add task",
         "tasks": "Project tasks",
         "task_done": "The task is successfully completed",
         "manager_commands": "Manager commands",
         "comment": "Comment",
-        "dashboard": "Dashboard"
+        "dashboard": "Dashboard",
+        "open_task": "Open the task"
     },
     "ru": {
         "my_tasks": "Мои задачи",
@@ -93,12 +95,13 @@ export const languages = {
         "priority": "приоритет",
         'task_created': "Создана новая задача",
         "add_bot_to_group": "Менеджер успешно добавлен",
-        "open_app": "Открыть приложение",
+        "open_app": "Откройте проект",
         "add_task": "Добавить задачу",
         "tasks": "Задачи проекта",
         "task_done": "Задача успешно выполнена",
         "manager_commands": "Команды менеджера",
         "comment": "Комментарий",
-        "dashboard": "Приборная панель"
+        "dashboard": "Приборная панель",
+        "open_task": "Откройте задачу"
     }
 }
