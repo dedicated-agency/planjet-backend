@@ -214,7 +214,7 @@ export class TaskService {
 
             let description = "";
             let title = name;
-            if(name.length > 190)
+            if(name.length > 100)
             {
                 description = name;
                 title = name.substring(0, 50) + "..."

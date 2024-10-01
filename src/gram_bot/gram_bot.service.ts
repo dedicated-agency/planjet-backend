@@ -101,6 +101,11 @@ export class GramBotService implements OnModuleInit {
 
     private async handleNewMessage(event: any) {
         const message = event.message;
+        console.log({
+            message: message,
+            media: message.media
+        });
+        
         if (!message) return;
         const chatId = message?.peerId;
         const messageId = message.id;
@@ -129,8 +134,6 @@ export class GramBotService implements OnModuleInit {
                 break;
             case "/dashboard@plan_jet_bot":
             case "/dashboard": 
-                await this.notificationService.addBotToChannel(chatId.channelId, 'en', topic);
-                break;
             case "/commands@plan_jet_bot":
             case "/commands": 
                 await this.notificationService.addBotToChannel(chatId.channelId, 'en', topic);
