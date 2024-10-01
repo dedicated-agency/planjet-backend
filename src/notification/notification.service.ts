@@ -198,21 +198,27 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
 
     inlineKeyboard(url: string, lang: string = 'en')
     {
-        return {
-            inline_keyboard: [
-                [
-                    {
-                        text: languages[lang].open_app,
-                        url: url
-                    }
-                ],
-                [
-                    {
-                        text: languages[lang].open_app,
-                        url: String(process.env.TELEGRAM_WEB_APP_URL)
-                    }
-                ]
+        const buttons = [
+            [
+                {
+                    text: languages[lang].dashboard,
+                    url: String(process.env.TELEGRAM_WEB_APP_URL)
+                }
             ]
+        ];
+
+        if(url !== String(process.env.TELEGRAM_WEB_APP_URL))
+        {
+            buttons.push([
+                {
+                    text: languages[lang].open_app,
+                    url: url
+                }
+            ])
+        }
+
+        return {
+            inline_keyboard: buttons
         };
     }
 }
