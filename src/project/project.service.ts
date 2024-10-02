@@ -135,7 +135,11 @@ export class ProjectService {
                     user: true,
                     status: true,
                     taskComment: true,
-                    taskUser: true
+                    taskUser: {
+                        include: {
+                            user: true
+                        }
+                    }
                 }
             });
 
