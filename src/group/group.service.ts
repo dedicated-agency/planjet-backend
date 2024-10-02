@@ -271,7 +271,16 @@ export class GroupService {
                 },
                 projects: {
                     include: {
-                        tasks: true
+                        tasks: {
+                            where: {
+                                status: {
+                                    name: "To do"
+                                }
+                            },
+                            include: {
+                                status: true
+                            }
+                        }
                     }
                 }
             }
