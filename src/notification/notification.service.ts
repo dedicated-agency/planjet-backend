@@ -79,11 +79,12 @@ export class NotificationService {
     messageShaper(lang: string = 'en', change: any)
     {
         try {
+            if(change.type === 'status')
             return {
                 text: `#${languages[lang].change} by ${change.user.name}
 
 <b>${change.task.name.length > 50 ? change.task.name.substring(0, 50) + "..." : change.task.name}</b>
-${languages[lang].project}: <b>${change.task.project.name} 💻</b>
+
 ${languages[lang].author}: <b>${change.task.user.name}</b>
 ${languages[lang][change.type]}: <b>${change.old_value} ➡️  ${change.new_value}</b> 
 `,
@@ -98,13 +99,15 @@ ${languages[lang][change.type]}: <b>${change.old_value} ➡️  ${change.new_val
     {
         try {
             return {
-                text: `#task by ${task.user.name}
+                text: `${languages[lang].task_created} 
 
 <b>${task.name.length > 50 ? task.name.substring(0, 50) + "..." : task.name}</b>
-${languages[lang].project}: <b>${task.project.name} 💻</b>
-${languages[lang].author}: <b>${task.user.name}</b>
-<b>${languages[lang].task_created}</b> 
-`,
+<b>${task.description}</b>
+
+${languages[lang].author}: <b>${task.user.name}</b>`,
+
+// ${languages[lang].project}: <b>${task.project.name} 💻</b>
+
     inlineKeyboard: this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=tasks_${task.id}`)
 }
         } catch (error) {
@@ -116,12 +119,14 @@ ${languages[lang].author}: <b>${task.user.name}</b>
     {
         try {
             return {
-                text: `#comment by ${change.user.name}
+                text: `${languages[lang].comment_was_written}
 
 <b>${change.task.name.length > 50 ? change.task.name.substring(0, 50) + "..." : change.task.name}</b>
-${languages[lang].project}: <b>${change.task.project.name} 💻</b>
-${languages[lang].author}: <b>${change.task.user.name}</b>
+<b>${change.task.description}</b>
+
 ${languages[lang].comment}: <b>${change.new_value}</b> 
+
+${change.user.name}
 `,
                 inlineKeyboard: this.inlineKeyboard(String(process.env.TELEGRAM_WEB_APP_URL) + `?startapp=tasks_${change.task_id}`)
             }
@@ -132,7 +137,6 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
 
     async addBotToChannel(chat_id: number, lang: string = 'en', topic?: any)
     {
-
         const data: any = {
             chat_id: `-100${Number(chat_id)}`,
             text: '',
@@ -190,8 +194,6 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
 
         if(type === 'commands')
         {
-            console.log(lang);
-            
             buttons.push([{
                 text: languages[lang].dashboard,
                 url: String(process.env.TELEGRAM_WEB_APP_URL)
@@ -200,6 +202,7 @@ ${languages[lang].comment}: <b>${change.new_value}</b>
                 text: languages[lang].open_app,
                 url: url
             }])
+
         }else{
             buttons.push([{
                 text: languages[lang].open_task,

@@ -105,6 +105,13 @@ export class StatusService {
     {
         try {
             const results: any = [];
+            const check = await this.prisma.project.findFirst({
+                where: {
+                    id: Number(id)
+                }
+            });
+
+            if(!check) throw new NotFoundException("Project not found")
             const statuses = await this.prisma.status.findMany({
                 where: {
                     project_id: Number(id),

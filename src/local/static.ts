@@ -32,7 +32,8 @@ export const languages = {
         "manager_commands": "Menejer buyruqlari",
         "comment": "Izoh",
         "dashboard": "Dashboard",
-        "open_task": "Vazifani oching"
+        "open_task": "Vazifani oching",
+        "comment_was_written": "Yangi fikr yozildi"
     },
     "en": {
         "my_tasks": "My tasks",
@@ -67,7 +68,8 @@ export const languages = {
         "manager_commands": "Manager commands",
         "comment": "Comment",
         "dashboard": "Dashboard",
-        "open_task": "Open the task"
+        "open_task": "Open the task",
+        "comment_was_written": "New comment was written"
     },
     "ru": {
         "my_tasks": "Мои задачи",
@@ -102,6 +104,7 @@ export const languages = {
         "manager_commands": "Команды менеджера",
         "comment": "Комментарий",
         "dashboard": "Приборная панель",
-        "open_task": "Откройте задачу"
+        "open_task": "Откройте задачу",
+        "comment_was_written": "Был написан новый комментарий"
     }
 }

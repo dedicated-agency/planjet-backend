@@ -214,10 +214,10 @@ export class TaskService {
 
             let description = "";
             let title = name;
-            if(name.length > 100)
+            if(name.length > 50)
             {
                 description = name;
-                title = name.substring(0, 50) + "..."
+                title = this.getFirstWords(name, 5)
             }
 
             const data: any = {
@@ -858,6 +858,11 @@ export class TaskService {
             }
         });
         return;
+    }
+
+    getFirstWords(input: string, wordCount: number) {
+        let words = input.split(/\s+/);
+        return words.slice(0, wordCount).join(" ");
     }
 }
 
