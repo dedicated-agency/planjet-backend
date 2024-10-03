@@ -152,7 +152,7 @@ export class UserService {
         let mainQuery: any = {
             user_id,
             is_viewed: false,
-            change: { not: null },
+            change: { isNot: null },
         }
 
         if(is_viewed === '1')
