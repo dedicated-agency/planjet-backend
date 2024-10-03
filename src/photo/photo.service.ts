@@ -28,7 +28,7 @@ export class PhotoService {
             const url = `https://api.telegram.org/file/bot${this.token}/${filePath}`;
             return url;
           } catch (error) {
-            throw new HttpException('Error fetching the profile photo', HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException('Error fetching the profile photo', HttpStatus.OK);
         }
     }
 }
