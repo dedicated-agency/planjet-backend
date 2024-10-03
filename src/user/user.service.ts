@@ -141,8 +141,6 @@ export class UserService {
 
     async events(user_id: string, is_viewed: string)
     {
-        console.log({user_id});
-        
         const checkUser = await this.prisma.user.findUnique({
             where: {
                 telegram_id: user_id
@@ -160,6 +158,8 @@ export class UserService {
         {
             mainQuery.is_viewed = true
         }
+
+        console.log({mainQuery});
 
         const events = await this.prisma.notification.findMany({
             where: mainQuery,
