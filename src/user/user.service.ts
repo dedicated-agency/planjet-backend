@@ -150,7 +150,7 @@ export class UserService {
         if(!checkUser) return [];
 
         let mainQuery: any = {
-            user_id: checkUser.telegram_id,
+            user_id,
             is_viewed: false
         }
 

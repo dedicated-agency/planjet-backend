@@ -105,7 +105,7 @@ export class StatusService {
     {
         try {
             const results: any = [];
-            const check = await this.prisma.project.findFirst({
+            const check = await this.prisma.project.findUnique({
                 where: {
                     id: Number(id)
                 }
