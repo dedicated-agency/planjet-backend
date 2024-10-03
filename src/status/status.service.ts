@@ -104,7 +104,7 @@ export class StatusService {
     async getStatuses(id: number, user_ids?: string[])
     {
         try {
-            console.log({id});
+            if (isNaN(id)) throw new NotFoundException("Project not found")
             
             const results: any = [];
             const check = await this.prisma.project.findUnique({
