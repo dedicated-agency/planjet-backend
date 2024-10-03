@@ -141,6 +141,8 @@ export class UserService {
 
     async events(user_id: string, is_viewed: string)
     {
+        console.log({user_id});
+        
         const checkUser = await this.prisma.user.findUnique({
             where: {
                 telegram_id: user_id
