@@ -104,6 +104,8 @@ export class StatusService {
     async getStatuses(id: number, user_ids?: string[])
     {
         try {
+            console.log({id});
+            
             const results: any = [];
             const check = await this.prisma.project.findUnique({
                 where: {
