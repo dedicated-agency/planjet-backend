@@ -161,7 +161,14 @@ export class UserService {
         }
 
         const events = await this.prisma.notification.findMany({
-            where: mainQuery,
+            // where: mainQuery,
+            where: {
+                user_id,
+                is_viewed: false,
+                change: { 
+                    id: { not: null }
+                 }
+            },
             include: {
                 change: {
                     include: {
