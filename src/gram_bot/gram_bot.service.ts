@@ -216,10 +216,6 @@ export class GramBotService implements OnModuleInit {
                 return
             }
 
-            // console.log({
-            //     photo: message[0].media
-            // });
-
             const usernameRegex = /@\w+/g;
             const usernames =  message[0].message.match(usernameRegex);
             const messageText =  message[0].message.replace(usernameRegex, '').trim();

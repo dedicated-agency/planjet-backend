@@ -78,16 +78,18 @@ export class UserService {
         return tasks;
     }
 
-    async tasksHeader(user_id: string)
+    async tasksHeader(user_id: string, project_id?: number)
     {
-        const tasks = await this.prisma.task.findMany({
-            where: {
-                taskUser: {
-                    some: {
-                        user_id
-                    }
+        const mainQuery: any = {
+            taskUser: {
+                some: {
+                    user_id
                 }
-            },
+            }
+        }
+        if(project_id) mainQuery.project_id = Number(project_id);
+        const tasks = await this.prisma.task.findMany({
+            where: mainQuery,
             include: {
                 status: true,
             }
@@ -144,46 +146,85 @@ export class UserService {
         ]
     }
 
-    async events(user_id: string, is_viewed: string)
+    async events(user_id: string, isViewed: string)
     {
-        const checkUser = await this.prisma.user.findUnique({
-            where: {
-                telegram_id: user_id
-            }
-        });
-
-        if(!checkUser) return [];
-
-        let mainQuery: any = {
-            user_id,
-            is_viewed: false,
-        }
-
-        if(is_viewed === '1')
+        let is_viewed = false
+        if(isViewed === '1')
         {
-            mainQuery.is_viewed = true
+            is_viewed = true
         }
-        try {
-            const events = await this.prisma.notification.findMany({
-                where: mainQuery,
-                include: {
-                    change: {
-                        include: {
-                            task: {
-                                include: {
-                                    project: true
-                                }
+        const tasks = await this.prisma.task.findMany({
+            where: {
+                taskUser: {
+                    some: {
+                        user_id
+                    }
+                },
+                taskChange: {
+                    some: {
+                        notification: {
+                            some: {
+                                is_viewed
                             }
                         }
                     }
                 }
-            });
-    
-            return events;
-        } catch (error) {
-            console.log('events error');
-            return [];
-        }
+            },
+            include: {
+                project: {
+                    include: {
+                        group: true
+                    }
+                },
+                taskChange: {
+                    include: {
+                        user: true,
+                        notification: true
+                    }
+                }
+            }
+        });
+
+        if (!tasks.length) return [];
+
+        const events: any[] = [];
+
+        tasks.map((task) => {
+            const element = {
+                task_id: task.id,
+                task_name: task.name,
+                project: task.project.name,
+                group: task.project.group.name,
+                events: []
+            }
+
+            if(task.taskChange.length)
+            {
+                const changes = {};
+                task.taskChange.map((change) => {
+                    const { user_id, user } = change;
+
+                    if (!changes[user_id]) {
+                        changes[user_id] = {
+                          user_id,
+                          user_name: user.name,
+                          changes: []
+                        };
+                    }
+                    changes[user_id].changes.push({
+                        type: change.type,
+                        old_value: change.old_value,
+                        new_value: change.new_value,
+                        created_at: change.created_at,
+                    });
+                });
+                element.events = Object.values(changes);
+            }
+            events.push(element);
+        });
+
+
+        return events;
     }
 
     async groups(user_id: string) 

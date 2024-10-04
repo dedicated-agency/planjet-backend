@@ -39,9 +39,10 @@ export class UserController {
   async tasksHeader(
     @Req() req,
     @Res() response: Response,
+    @Query("project_id") project_id: number,
   ){
     const {user} = req;
-    return response.json(await this.userService.tasksHeader(user.telegram_id));
+    return response.json(await this.userService.tasksHeader(user.telegram_id, project_id));
   }
 
   @Get("status")
