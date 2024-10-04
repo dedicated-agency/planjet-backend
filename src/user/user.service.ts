@@ -158,23 +158,27 @@ export class UserService {
         {
             mainQuery.is_viewed = true
         }
-
-        const events = await this.prisma.notification.findMany({
-            where: mainQuery,
-            include: {
-                change: {
-                    include: {
-                        task: {
-                            include: {
-                                project: true
+        try {
+            const events = await this.prisma.notification.findMany({
+                where: mainQuery,
+                include: {
+                    change: {
+                        include: {
+                            task: {
+                                include: {
+                                    project: true
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
-
-        return events;
+            });
+    
+            return events;
+        } catch (error) {
+            console.log('events error');
+            return [];
+        }
     }
 
     async groups(user_id: string) 
