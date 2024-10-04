@@ -152,7 +152,6 @@ export class UserService {
         let mainQuery: any = {
             user_id,
             is_viewed: false,
-            change: { isNot: null },
         }
 
         if(is_viewed === '1')
@@ -161,14 +160,7 @@ export class UserService {
         }
 
         const events = await this.prisma.notification.findMany({
-            // where: mainQuery,
-            where: {
-                user_id,
-                is_viewed: false,
-                change: { 
-                    id: { not: null }
-                 }
-            },
+            where: mainQuery,
             include: {
                 change: {
                     include: {
