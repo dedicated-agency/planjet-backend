@@ -28,9 +28,10 @@ export class UserController {
     @Req() req,
     @Res() response: Response,
     @Query("status") status: string,
+    @Query("project_id") project_id: number,
   ){
     const {user} = req;
-    return response.json(await this.userService.tasks(user.telegram_id, status));
+    return response.json(await this.userService.tasks(user.telegram_id, status, project_id));
   }
 
   @Get("tasks/header")

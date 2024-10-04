@@ -50,20 +50,25 @@ export class UserService {
         return {...check, token: this.encrypt(check.telegram_id)}
     }
 
-    async tasks(user_id: string, status: string)
+    async tasks(user_id: string, status: string, project_id?: number)
     {
         if(status === undefined) status = 'To do';
-        const tasks = await this.prisma.task.findMany({
-            where: {
-                taskUser: {
-                    some: {
-                        user_id
-                    }
-                },
-                status: {
-                    name: status
+        
+        const mainQuery: any = {
+            taskUser: {
+                some: {
+                    user_id
                 }
             },
+            status: {
+                name: status
+            }
+        };
+        
+        if(project_id !== undefined && !isNaN(project_id)) mainQuery.project_id = Number(project_id);
+        
+        const tasks = await this.prisma.task.findMany({
+            where: mainQuery,
             include: {
                 status: true,
                 project: true,
