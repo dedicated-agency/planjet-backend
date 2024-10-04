@@ -116,19 +116,39 @@ export class TaskService {
                 }
             });
 
-            await this.prisma.taskUser.createMany({
-                data: participant.map((part: any) => ({
-                    user_id: String(part),
-                    task_id: newTask.id
-                }))
-            });
+            if(participant.length > 0 && isNaN(Number(participant[0]))) {
+                const participants = await this.prisma.user.findMany({
+                    where: {
+                        username: {
+                            in: participant.map(el => String(el))
+                        }
+                    }
+                });
+                await this.prisma.taskUser.createMany({
+                    data: participants.map((part: any) => ({
+                        user_id: part.telegram_id,
+                        task_id: newTask.id
+                    }))
+                });
 
-            if(change){
-                await this.notification.send(newTask.project.group_id, 13, newTask.user.language_code, "createTask", newTask);
-                for (const participant_id of participant) {
-                    await this.createNotification(Number(change.id), String(participant_id))
+                for (const participant_user of participants) {
+                    await this.createNotification(Number(change.id), String(participant_user.telegram_id))
                 }
-            } 
+
+            }else{
+                await Promise.all([
+                    this.prisma.taskUser.create({
+                        data:{
+                            user_id: String(participant[0]),
+                            task_id: newTask.id
+                        }
+                    }),
+                    this.createNotification(Number(change.id), String(participant[0]))
+                ])
+            }
+
+            await this.notification.send(newTask.project.group_id, 13, newTask.user.language_code, "createTask", newTask);
+       
             return newTask;
         }
         return check
@@ -867,6 +887,9 @@ export class TaskService {
 
     async createNotification(change_id: number, user_id: string)
     {
+        console.log( change_id,
+        user_id,);
+        
         await this.prisma.notification.create({
             data: {
                 change_id: Number(change_id),
