@@ -22,7 +22,7 @@ import { NotificationService } from './notification/notification.service';
     ConfigModule.forRoot({
       isGlobal: true, 
     }),
-    // GramBotModule,
+    GramBotModule,
     UserModule,
     GroupModule,
     ProjectModule,

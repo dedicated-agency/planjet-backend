@@ -15,10 +15,10 @@ export class TaskService {
             project_id: number,
             name: string,
             description: string,
-            deadline: string,
             participant: number[],
             priority: number,
-            point: number
+            point: number,
+            message_id?: number,
         }, user_id: string
     )
     {
@@ -26,10 +26,10 @@ export class TaskService {
             project_id,
             name,
             description,
-            deadline,
             participant,
             priority,
-            point
+            point,
+            message_id,
         } = data;
 
         const project = await this.prisma.project.findUnique({
@@ -91,9 +91,9 @@ export class TaskService {
                     name,
                     participants: `${user_id}`,
                     description,
-                    // deadline: new Date(deadline),
                     priority,
                     point: Number(point),
+                    message_id
                 },
                 include: {
                     status: true,
@@ -116,22 +116,6 @@ export class TaskService {
                 }
             });
 
-            if(change){
-                await this.notification.send(newTask.project.group_id, 13, newTask.user.language_code, "createTask", newTask);
-
-                const taskUsers = await this.prisma.taskUser.findMany({
-                    where: {
-                        task_id:  Number(newTask.id)
-                    }
-                });
-
-                for (const taskUser of taskUsers) {
-                    await this.createNotification(Number(change.id), taskUser.user_id)
-                }
-            } 
-
-       
-
             await this.prisma.taskUser.createMany({
                 data: participant.map((part: any) => ({
                     user_id: String(part),
@@ -139,9 +123,14 @@ export class TaskService {
                 }))
             });
 
+            if(change){
+                await this.notification.send(newTask.project.group_id, 13, newTask.user.language_code, "createTask", newTask);
+                for (const participant_id of participant) {
+                    await this.createNotification(Number(change.id), String(participant_id))
+                }
+            } 
             return newTask;
         }
-
         return check
     }
 
@@ -153,8 +142,18 @@ export class TaskService {
             message_id, 
             user_id, 
             name,
-            group_id
+            group_id,
+            participant,
         } = props;
+
+
+        let title = name;
+        let description = "";
+        if(name.length > 50)
+        {
+            description = name;
+            title = this.getFirstWords(name, 5)
+        }
 
         let project = await this.prisma.project.findFirst({
             where: {
@@ -163,6 +162,24 @@ export class TaskService {
                 group_id: String(group_id)
             }
         });
+
+        return await this.create({
+            project_id: project.id,
+            name: title,
+            description,
+            participant,
+            priority: 2,
+            point: 0,
+            message_id
+        }, user_id)
+
+        // let project = await this.prisma.project.findFirst({
+        //     where: {
+        //         topic_id: String(topic_id),
+        //         name: topic_title,
+        //         group_id: String(group_id)
+        //     }
+        // });
 
         if(!project) throw new NotFoundException("Project not found");
         

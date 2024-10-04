@@ -210,16 +210,15 @@ export class GramBotService implements OnModuleInit {
         try {
             const message: any = await this.client.getMessages(chatId, {ids: messageId, limit: 1});
 
-
             if(message.length === 1 && message[0] === undefined)
             {
                 await this.sendMessage(chatId, "Bot is not admin, Please check admin permissions", messageId);
                 return
             }
 
-            console.log({
-                photo: message[0].media
-            });
+            // console.log({
+            //     photo: message[0].media
+            // });
 
             const usernameRegex = /@\w+/g;
             const usernames =  message[0].message.match(usernameRegex);
@@ -231,37 +230,22 @@ export class GramBotService implements OnModuleInit {
                 message_id: Number(messageId),
                 name: resultText,
                 user_id: Number(userId),
-                group_id: Number(chatId.channelId)
+                group_id: Number(chatId.channelId),
+                participant: usernames && usernames.length > 0 ? usernames.map((username: string) => username) : [userId]
             });
-            const checkChange = await this.prisma.taskChange.create({
-                data: {
-                    user_id: String(userId),
-                    task_id: Number(task.id),
-                    type: "created",
-                    old_value: "created",
-                    new_value: "created"
-                }
-            });
-            if(checkChange)
-            {
-                await Promise.all([
-                    this.notificationService.send(task.project.group_id, checkChange.id, task.user.language_code, "createTask", task), 
-                    doneMessageId && this.removeMessage(task.project.group_id, doneMessageId), 
-                    this.taskService.createNotification(checkChange.id, String(userId)),
-                    this.client.invoke(
-                        new Api.messages.SendReaction({
-                            peer: `-100${task.project.group_id}`,
-                            msgId: Number(messageId),
-                            //   @ts-ignore
-                            reaction: [new Api.ReactionEmoji({emoticon:"🤝"})]
-                        })
-                    )
-                ]);
-            }
-            if(usernames?.length)
-            {
-                await this.taskService.participants(usernames, task.id);
-            }
+
+            await Promise.all([
+                this.client.invoke(
+                    new Api.messages.SendReaction({
+                        peer: `-100${task.project.group_id}`,
+                        msgId: Number(messageId),
+                        //   @ts-ignore
+                        reaction: [new Api.ReactionEmoji({emoticon:"🤝"})]
+                    })
+                ),
+                doneMessageId && this.removeMessage(task.project.group_id, doneMessageId),
+            ]);
+            
         } catch (error) {
             console.log("Create task error " + error);
         }
