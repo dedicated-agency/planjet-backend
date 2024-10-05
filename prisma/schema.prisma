@@ -48,19 +48,36 @@ model GroupUser{
   group Group @relation(fields: [group_id], references: [id])
 }
 
+enum StatusNotificationPermission {
+  TODO
+  IN_PROGRESS
+  TESTING
+  COMPLETED
+}
+
+enum ProjectNotificationPermission {
+  CREATE
+  EDIT 
+  DELETE 
+  ARCHIVE 
+  COMMENT  
+}
+
 model Project {
   id Int @default(autoincrement()) @id
   group_id String?
   topic_id String
   name String
-  add_permission Boolean @default(false)
-  edit_permission Boolean @default(false)
-  status_permission Boolean @default(false)
-  archive_permission Boolean @default(false)
-  delete_permission Boolean @default(false)
-  comment_permission Boolean @default(false)
+  // add_permission Boolean @default(false)
+  // edit_permission Boolean @default(false)
+  // status_permission Boolean @default(false)
+  // archive_permission Boolean @default(false)
+  // delete_permission Boolean @default(false)
+  // comment_permission Boolean @default(false)
   notification_lang String @default("en")
   is_selected Boolean @default(false)
+  statusNotificationPermissions String @default("[]")
+  projectNotificationPermissions String @default("[]")
 
   group Group? @relation(fields: [group_id], references: [id])
   tasks Task[]

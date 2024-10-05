@@ -247,30 +247,67 @@ export class ProjectService {
 
         const data: any = {};
 
-        if(type === 'create')
-        {
-            data.add_permission = value
-        }else if(type === 'status')
-        {
-            data.status_permission = value
-        }else if(type === 'comment')
-        {
-            data.comment_permission = value
-        }else if(type === 'is_selected')
-        {
-            data.is_selected = value
-        }else if(type === 'edit')
-        {
-            data.edit_permission = value
+        switch (type) {
+            case "is_selected":
+                data.is_selected = value;
+                break;
+            case "create":
+            case "comment":
+            case "edit":
+            case "archive":
+            case "delete":
+                if (value) {
+                    const permissionArray: string[] = JSON.parse(project.projectNotificationPermissions);
+                    if (!permissionArray.includes(type)) {
+                        permissionArray.push(type);
+                    }
+                    data.projectNotificationPermissions = JSON.stringify(permissionArray);
+                
+                } else {
+                    const permissionArray: string[] = JSON.parse(project.projectNotificationPermissions);
+                    const updatedArray = permissionArray.filter(item => item !== type);
+                    data.projectNotificationPermissions = JSON.stringify(updatedArray);
+                }
+                break;
+            case "todo":
+            case "in_progress":
+            case "testing":
+            case "completed":
+                const permissionArray: string[] = JSON.parse(project.statusNotificationPermissions);
+                if (value) {
+                    if (!permissionArray.includes(type)) { permissionArray.push(type); }
+                    data.statusNotificationPermissions = JSON.stringify(permissionArray);
+                } else {
+                    const updatedArray = permissionArray.filter(item => item !== type);
+                    data.statusNotificationPermissions = JSON.stringify(updatedArray);
+                }
+                break;
         }
-        else if(type === 'archive')
-        {
-            data.archive_permission = value
-        }
-        else if(type === 'delete')
-        {
-            data.delete_permission = value
-        }
+
+        // if(type === 'create')
+        // {
+        //     data.add_permission = value
+        // }else if(type === 'status')
+        // {
+        //     data.status_permission = value
+        // }else if(type === 'comment')
+        // {
+        //     data.comment_permission = value
+        // }else if(type === 'is_selected')
+        // {
+        //     data.is_selected = value
+        // }else if(type === 'edit')
+        // {
+        //     data.edit_permission = value
+        // }
+        // else if(type === 'archive')
+        // {
+        //     data.archive_permission = value
+        // }
+        // else if(type === 'delete')
+        // {
+        //     data.delete_permission = value
+        // }
 
         try {
             return await this.prisma.project.update({
@@ -296,4 +333,17 @@ export class ProjectService {
             }
         });
     }
+
+    // private availablePermissions = {
+    //     "create": 1,
+    //     "comment": 1,
+    //     "is_selected": 1,
+    //     "edit": 1,
+    //     "archive": 1,
+    //     "delete": 1,
+    //     "todo": 1,
+    //     "in_progress": 1,
+    //     "testing": 1,
+    //     "completed": 1,
+    // }
 }

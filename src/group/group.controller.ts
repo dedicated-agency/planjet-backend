@@ -3,6 +3,12 @@ import { GroupService } from './group.service';
 import { Response } from 'express';
 import { UserGuard } from 'src/user/user.guard';
 
+interface selectGroup {
+  is_selected: boolean
+  group_id: string
+}
+
+
 @Controller('group')
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
@@ -25,6 +31,17 @@ export class GroupController {
   ){
     const {user} = req;
     return response.json(await this.groupService.selectedGroups(user.telegram_id))
+  }
+
+  @Post("selector")
+  @UseGuards(UserGuard)
+  async selector(
+    @Req() req,
+    @Res() response: Response,
+    @Body() data: selectGroup[]
+  ){
+    const {user} = req;
+    return response.json(await this.groupService.selector(user.telegram_id, data))
   }
 
   @Post("init")

@@ -1,11 +1,18 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
+import { UserService } from 'src/user/user.service';
+
+interface selectGroup {
+    is_selected: boolean
+    group_id: string
+}
 
 @Injectable()
 export class GroupService {
 
     constructor(
-        private readonly prisma: PrismaService
+        private readonly prisma: PrismaService,
+        private readonly userService: UserService
     ){}
 
     async init(data: {
@@ -51,33 +58,6 @@ export class GroupService {
                             group_id: String(group_id)
                         }
                     });
-
-                    // const mytaskproject = await this.prisma.project.create({
-                    //     data: {
-                    //         name: "mytasks",
-                    //         topic_id: String(userId),
-                    //     }
-                    // });
-
-                    // if(mytaskproject)
-                    // {
-                    //     let statuses: any = await this.prisma.status.findMany({
-                    //         where: {
-                    //             project_id: Number(mytaskproject.id)
-                    //         }
-                    //     });
-            
-                    //     if(statuses.length === 0)
-                    //     {
-                    //         statuses = await this.prisma.status.createMany({
-                    //             data: this.statusList.map((element) => ({
-                    //                 name: element.name,
-                    //                 order: element.id,
-                    //                 project_id: Number(mytaskproject.id) 
-                    //             }))
-                    //         });
-                    //     }
-                    // }
                 }
             });
         }
@@ -212,25 +192,6 @@ export class GroupService {
         }
     }
 
-    private statusList = [
-        {
-            id: 1,
-            name: "To do",
-        },
-        {
-            id: 2,
-            name: "In Progress",
-        },
-        {
-            id: 3,
-            name: "Testing",
-        },
-        {
-            id: 4,
-            name: "Completed",
-        }
-    ];
-
     async selected(id: string, is_selected: string, user_id: string)
     {
         const check = await this.prisma.group.findFirst({
@@ -243,7 +204,7 @@ export class GroupService {
             where: { 
                 group_id_user_id: {
                     group_id: id,
-                    user_id: user_id
+                    user_id
                 }
              },
             data: {
@@ -310,5 +271,33 @@ export class GroupService {
         });
 
         return result;
+    }
+
+    async selector (user_id: string, groups: selectGroup[]) 
+    {
+        if(groups.length)
+        {
+            for (const element of groups) {
+                const check = await this.prisma.group.findFirst({
+                    where: {
+                        id: String(element.group_id)
+                    }
+                });
+                if(!check) throw new BadRequestException("Group not found");
+                await this.prisma.groupUser.update({
+                    where: { 
+                        group_id_user_id: {
+                            group_id: String(element.group_id),
+                            user_id
+                        }
+                     },
+                    data: {
+                        is_selected: Boolean(element.is_selected)
+                    }
+                })
+            }
+        }
+
+        return await this.userService.groups(user_id);
     }
 }
