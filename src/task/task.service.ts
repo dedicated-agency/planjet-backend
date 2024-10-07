@@ -749,49 +749,20 @@ export class TaskService {
 
     async viewed(user_id: string, task_id: number)
     {
-        const changes = await this.prisma.taskChange.findMany({
+        const viewedTasks = await this.prisma.notification.updateMany({
             where: {
-                task_id: Number(task_id)
-            },
-            select: {
-                id: true,
-                notification: {
-                    where: {
-                        user_id,
-                        is_viewed: false
-                    },
-                    select: {
-                        id: true,
-                        user_id: true
-                    }
+                user_id,
+                change: {
+                    task_id: task_id
                 }
+            },
+            data: {
+                is_viewed: true
             }
         });
-    
-        if (!changes.length) return;
-        
-        const notificationIds: number[] = changes.reduce((ids, change) => {
-            if (change.notification.length) {
-                change.notification.forEach((noti) => {
-                    if (noti.user_id === user_id) {
-                        ids.push(noti.id);
-                    }
-                });
-            }
-            return ids;
-        }, []);
 
-        if (notificationIds.length) {
-            await this.prisma.notification.updateMany({
-                where: {
-                    id: { in: notificationIds }
-                },
-                data: {
-                    is_viewed: true
-                }
-            });
-        }
-    
+        console.log({viewedTasks});
+
         return;
     }
 
