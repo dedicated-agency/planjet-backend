@@ -770,8 +770,6 @@ export class TaskService {
             }
         });
 
-        console.log({tasks, viewedTasks});
-
         return;
     }
 
