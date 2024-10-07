@@ -77,4 +77,16 @@ export class GroupController {
     const {user} = req;
     return response.json(await this.groupService.selected(id, is_selected, user.telegram_id))
   }
+
+  @Get(":id/users")
+  @UseGuards(UserGuard)
+  async users(
+    @Req() req,
+    @Res() response: Response,
+    @Param("id") id: string,
+  ){
+    const {user} = req;
+    return response.json(await this.groupService.users(id, user.telegram_id))
+  }
+
 }

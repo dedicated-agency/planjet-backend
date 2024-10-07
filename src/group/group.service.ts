@@ -300,4 +300,21 @@ export class GroupService {
 
         return await this.userService.groups(user_id);
     }
+
+    async users(id: string, user_id?: string)
+    {
+        try {
+            return this.prisma.user.findFirst({
+                where: {
+                    groupUsers: {
+                        some: {
+                            group_id: id
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            return [];
+        }
+    }
 }
