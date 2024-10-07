@@ -223,7 +223,6 @@ export class UserService {
             events.push(element);
         });
 
-
         return events;
     }
 

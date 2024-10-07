@@ -749,6 +749,15 @@ export class TaskService {
 
     async viewed(user_id: string, task_id: number)
     {
+        const tasks = await this.prisma.notification.findMany({
+            where: {
+                user_id,
+                change: {
+                    task_id: task_id
+                }
+            }
+        });
+
         const viewedTasks = await this.prisma.notification.updateMany({
             where: {
                 user_id,
@@ -761,7 +770,7 @@ export class TaskService {
             }
         });
 
-        console.log({viewedTasks});
+        console.log({tasks, viewedTasks});
 
         return;
     }
