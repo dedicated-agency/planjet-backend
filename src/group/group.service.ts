@@ -301,16 +301,15 @@ export class GroupService {
         return await this.userService.groups(user_id);
     }
 
-    async users(id: string, user_id?: string)
+    async users(group_id: string, user_id?: string)
     {
         try {
-            return this.prisma.user.findFirst({
-                where: {
-                    groupUsers: {
-                        some: {
-                            group_id: id
-                        }
-                    }
+            return this.prisma.groupUser.findFirst({
+                where:{
+                    group_id
+                },
+                include: {
+                    user: true
                 }
             });
         } catch (error) {
