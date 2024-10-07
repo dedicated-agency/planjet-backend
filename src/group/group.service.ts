@@ -304,7 +304,7 @@ export class GroupService {
     async users(group_id: string, user_id?: string)
     {
         try {
-            return this.prisma.groupUser.findFirst({
+            return this.prisma.groupUser.findMany({
                 where:{
                     group_id
                 },
