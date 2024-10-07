@@ -164,6 +164,7 @@ export class UserService {
                     some: {
                         notification: {
                             some: {
+                                user_id,
                                 is_viewed
                             }
                         }
