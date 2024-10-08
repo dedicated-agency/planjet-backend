@@ -12,6 +12,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { PhotoModule } from './photo/photo.module';
 import { NotificationService } from './notification/notification.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { NotificationService } from './notification/notification.service';
     TaskModule,
     StatusModule,
     PhotoModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [PrismaService, UserService, NotificationService],

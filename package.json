@@ -27,6 +27,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/serve-static": "^4.0.2",
     "@prisma/client": "^5.17.0",
+    "@telegram-apps/init-data-node": "^1.1.1",
     "axios": "^1.7.2",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
