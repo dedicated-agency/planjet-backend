@@ -14,6 +14,8 @@ export class AuthController {
     if (!initData) {
       throw new Error('Init data not found');
     }
+    console.log({initData});
+    
     return res.json(initData);
   }
 }
