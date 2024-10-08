@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Response } from 'express';
+import { response, Response } from 'express';
 import { UserGuard } from './user.guard';
 
 @Controller('user')
@@ -85,5 +85,15 @@ export class UserController {
   {
     const {user} = req;
     return  user
+  }
+
+  @Post('language')
+  @UseGuards(UserGuard)
+  async language(
+    @Req() req,
+    @Body("lang") lang: string
+  ){
+    const {user} = req;
+    return response.json(await this.userService.language(user.telegram_id, lang));
   }
 }

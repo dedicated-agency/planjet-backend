@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { publicEncrypt, privateDecrypt } from 'crypto';
 
@@ -280,5 +280,23 @@ export class UserService {
     decrypt(encryptedData: string): string {
         const decryptedData = privateDecrypt(privateKey, Buffer.from(encryptedData, 'base64'));
         return decryptedData.toString();
+    }
+
+
+    async language(id: string, lang: string)
+    {
+        try {
+            return await this.prisma.user.update({
+                where: {
+                    telegram_id: id,
+                },
+                data: {
+                    language_code: lang
+                }
+            })
+        } catch (error) {
+            console.log(error);
+            throw new BadRequestException("not updated language")
+        }
     }
 }
