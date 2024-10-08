@@ -13,8 +13,12 @@ export class AuthGuard implements CanActivate {
     const [authType, authData = ''] = authHeader.split(' ');
 
     if (authType !== 'tma') {
+      console.log("tma Unauthorized");
       throw new UnauthorizedException('Unauthorized');
     }
+
+    console.log({authData});
+    
 
     try {
       // Validate init data
@@ -26,6 +30,7 @@ export class AuthGuard implements CanActivate {
       response.locals.initData = parse(authData);
       return true;
     } catch (error) {
+      console.log({error});
       throw new UnauthorizedException(error.message);
     }
   }
