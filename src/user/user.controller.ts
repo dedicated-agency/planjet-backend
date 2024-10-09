@@ -96,8 +96,6 @@ export class UserController {
   ){
     const {user} = req;
     const {lang} = data;
-    console.log({data, lang});
-    
     return response.json(await this.userService.language(user.telegram_id, lang));
   }
 }
