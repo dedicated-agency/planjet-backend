@@ -12,8 +12,6 @@ export class AuthGuard implements CanActivate {
     const authHeader = request.header('authorization') || '';
     const [authType, authData = ''] = authHeader.split(' ');
 
-    console.log({authType, authData}) 
-   
     if(authData === 'TEST_MODE')
     {
       response.locals.initData = {
@@ -43,8 +41,6 @@ export class AuthGuard implements CanActivate {
       });
 
       response.locals.initData = parse(authData);
-      console.log({vali: response.locals.initData});
-      
       return true;
     } catch (error) {
       console.log({error});
