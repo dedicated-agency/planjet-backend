@@ -12,6 +12,7 @@ export class AuthController {
   showInitData(@Res() res: Response) {
     const initData = res.locals.initData;
     if (!initData) {
+      console.log("Init data not found");
       throw new Error('Init data not found');
     }
     console.log({initData});
