@@ -11,6 +11,8 @@ export class AuthGuard implements CanActivate {
 
     const authHeader = request.header('authorization') || '';
     const [authType, authData = ''] = authHeader.split(' ');
+
+    console.log({authType, authData}) 
    
     if(authData === 'TEST_MODE')
     {
