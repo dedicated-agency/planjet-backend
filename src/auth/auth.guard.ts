@@ -45,6 +45,8 @@ export class AuthGuard implements CanActivate {
       response.locals.initData = parse(authData);
       return true;
     } catch (error) {
+      console.log({error});
+      
       throw new UnauthorizedException(error.message);
     }
   }
