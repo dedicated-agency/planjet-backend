@@ -16,7 +16,6 @@ export class AuthController {
       throw new Error('Init data not found');
     }
     console.log({initData});
-    
     return res.json(initData);
   }
 }
