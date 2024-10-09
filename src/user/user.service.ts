@@ -285,18 +285,21 @@ export class UserService {
 
     async language(id: string, lang: string)
     {
+        
         try {
-            return await this.prisma.user.update({
+            const result = await this.prisma.user.update({
                 where: {
                     telegram_id: id,
                 },
                 data: {
                     language_code: lang
                 }
-            })
+            });
+            if(result) return {"message": "Successfully changed"}
+            throw new BadRequestException("Language not updated ")
         } catch (error) {
             console.log(error);
-            throw new BadRequestException("not updated language")
+            throw new BadRequestException("Language not updated ")
         }
     }
 }

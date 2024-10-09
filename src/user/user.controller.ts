@@ -91,9 +91,13 @@ export class UserController {
   @UseGuards(UserGuard)
   async language(
     @Req() req,
-    @Body("lang") lang: string
+    @Body() data: any,
+    @Res() response: Response,
   ){
     const {user} = req;
+    const {lang} = data;
+    console.log({data, lang});
+    
     return response.json(await this.userService.language(user.telegram_id, lang));
   }
 }
