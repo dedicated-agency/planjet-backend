@@ -11,8 +11,7 @@ export class AuthGuard implements CanActivate {
 
     const authHeader = request.header('authorization') || '';
     const [authType, authData = ''] = authHeader.split(' ');
-    
-    console.log({authData, authType});
+   
 
     if (authType !== 'tma') {
       throw new UnauthorizedException('Unauthorized');
@@ -20,7 +19,7 @@ export class AuthGuard implements CanActivate {
     
     try {
       validate(authData, this.token, {
-        expiresIn: 3600,
+        expiresIn: 7200,
       });
 
       response.locals.initData = parse(authData);
