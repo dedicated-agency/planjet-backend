@@ -6,8 +6,6 @@ import { UserGuard } from './user.guard';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-
   @Get("tasks")
   @UseGuards(UserGuard)
   async tasks(
