@@ -23,7 +23,7 @@ import { AuthModule } from './auth/auth.module';
     ConfigModule.forRoot({
       isGlobal: true, 
     }),
-    // GramBotModule,
+    GramBotModule,
     UserModule,
     GroupModule,
     ProjectModule,
