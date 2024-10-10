@@ -36,7 +36,7 @@ export class UserService {
 
         if (!check) 
         {
-            const result = await this.prisma.user.create({
+            return await this.prisma.user.create({
                 data: {
                     telegram_id: String(id),
                     name: first_name,
@@ -44,10 +44,9 @@ export class UserService {
                     language_code: language_code ? language_code : "en",
                 }
             });  
-            return {...result, token: this.encrypt(result.telegram_id)}
         }
 
-        return {...check, token: this.encrypt(check.telegram_id)}
+        return check
     }
 
     async tasks(user_id: string, status: string, project_id?: number)
@@ -270,16 +269,6 @@ export class UserService {
         });
 
         return result;
-    }
-
-    encrypt(data: string): string {
-        const encryptedData = publicEncrypt(publicKey, Buffer.from(data));
-        return encryptedData.toString('base64');
-    }
-    
-    decrypt(encryptedData: string): string {
-        const decryptedData = privateDecrypt(privateKey, Buffer.from(encryptedData, 'base64'));
-        return decryptedData.toString();
     }
 
 

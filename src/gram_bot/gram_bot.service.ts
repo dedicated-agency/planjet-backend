@@ -319,30 +319,6 @@ export class GramBotService implements OnModuleInit {
                     await this.groupService.checkUsers(nonBotUsers, channel_id);
                 }
 
-
-                // const users = result.users;
-                // users.map(async (user: {
-                //     id: number,
-                //     bot: boolean,
-                //     langCode: string,
-                //     firstName: string,
-                //     username: string | null,
-                //     photo: {id: number} | null
-                // }) => {
-                //     if(!user.bot)
-                //     {
-                //         const checkUser = await this.userService.init({
-                //             id: user.id,
-                //             first_name: user.firstName,
-                //             language_code: user.langCode,
-                //             username: user.username,
-                //         });
-                //         if(checkUser)
-                //         {
-                //             await this.groupService.checkUsers([user.id], channel_id)
-                //         }
-                //     }
-                // });
             }
 
         } catch (error) {
